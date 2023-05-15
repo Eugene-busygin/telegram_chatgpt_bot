@@ -61,12 +61,11 @@ bot.start( async (ctx) => {
 
 // AUTH
 bot.command('auth', async (ctx) => {
+    const chatId = ctx.message.chat.id;
     if (savedChats[chatId]) {
         await ctx.reply(`Вы уже авторизованы в чате!`);
         return;
     }
-    const chatId = ctx.message.chat.id;
-
     // sendGpt(chatId);
 });
 
