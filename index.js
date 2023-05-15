@@ -14,6 +14,7 @@ const config = new Configuration({
 const openai = new OpenAIApi(config);
 let gptHistory = [];
 
+
 // TELEGRAM
 const bot = new Telegraf(process.env.BOT_TOKEN);
 
