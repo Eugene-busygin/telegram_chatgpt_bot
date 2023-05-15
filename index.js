@@ -287,8 +287,13 @@ bot.on('callback_query', async (ctx) => {
     }
 });
 
+try {
+    bot.launch();
+} catch(e) {
+    console.log('ERROR: ' + e)
+}
 
-bot.launch();
+
 
 // Enable graceful stop
 process.once('SIGINT', () => bot.stop('SIGINT'));
