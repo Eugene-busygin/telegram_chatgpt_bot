@@ -104,7 +104,7 @@ const botEditMsgReplyMarkup = async (bot, chatId, messageId) => {
     if (savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
         choiceOptions = choiceTypeStablediffusionImageOptions;
     }
-    bot.editMessageReplyMarkup(choiceOptions.reply_markup, { chat_id: chatId, message_id: messageId });
+    bot.editMessageReplyMarkup(choiceOptions);
     bot.sendMessage(chatId, `${savedChats[chatId].gptType.name} режим выбран, слушаю`);
 }
 
@@ -703,8 +703,6 @@ bot.on('callback_query', async (ctx) => {
         }
     }
 
-    console.log('@@@', savedChats[chatId])
-
     if (savedChats[chatId] && savedChats[chatId].isAuth) {
         switch(field) {
             // GPT
@@ -735,7 +733,7 @@ bot.on('callback_query', async (ctx) => {
             case '/more_gpt_image':
                 const text = savedChats[chatId].savedLastMessage;
                 if (text && savedChats[chatId].gptType.type === constants.GPT_TYPE.image.type) {
-                    botInstance.editMessageReplyMarkup(emptyOptions, { chat_id: chatId, message_id: messageId });
+                    botInstance.editMessageReplyMarkup(emptyOptions);
                     answerGpt(chatId, text);
                 }
                 break;
@@ -750,13 +748,13 @@ bot.on('callback_query', async (ctx) => {
 
                 const t = savedChats[chatId].savedLastMessage;
                 if (t && savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
-                    botInstance.editMessageReplyMarkup(emptyOptions, { chat_id: chatId, message_id: messageId });
+                    botInstance.editMessageReplyMarkup(emptyOptions);
                     getStablediffusionImage(botInstance, chatId, t);
                 }
                 break;
 
             case '/reload_gpt_dialog':
-                botInstance.editMessageReplyMarkup(emptyOptions, { chat_id: chatId, message_id: messageId });
+                botInstance.editMessageReplyMarkup(emptyOptions);
                 reloadGptHistory(chatId, true);
                 break;
 
