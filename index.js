@@ -104,7 +104,7 @@ const botEditMsgReplyMarkup = async (bot, chatId, messageId) => {
     if (savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
         choiceOptions = choiceTypeStablediffusionImageOptions;
     }
-    bot.editMessageReplyMarkup(choiceOptions);
+    bot.editMessageReplyMarkup(chatId, messageId, null, choiceOptions);
     bot.sendMessage(chatId, `${savedChats[chatId].gptType.name} режим выбран, слушаю`);
 }
 
@@ -733,7 +733,7 @@ bot.on('callback_query', async (ctx) => {
             case '/more_gpt_image':
                 const text = savedChats[chatId].savedLastMessage;
                 if (text && savedChats[chatId].gptType.type === constants.GPT_TYPE.image.type) {
-                    botInstance.editMessageReplyMarkup(emptyOptions);
+                    botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions);
                     answerGpt(chatId, text);
                 }
                 break;
@@ -748,13 +748,13 @@ bot.on('callback_query', async (ctx) => {
 
                 const t = savedChats[chatId].savedLastMessage;
                 if (t && savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
-                    botInstance.editMessageReplyMarkup(emptyOptions);
+                    botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions);
                     getStablediffusionImage(botInstance, chatId, t);
                 }
                 break;
 
             case '/reload_gpt_dialog':
-                botInstance.editMessageReplyMarkup(emptyOptions);
+                botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions);
                 reloadGptHistory(chatId, true);
                 break;
 
