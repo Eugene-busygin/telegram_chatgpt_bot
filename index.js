@@ -620,7 +620,7 @@ bot.on('text', (ctx) => {
         if (msg.reply_to_message.video) {
             const videoFile = msg.reply_to_message.video;
             const fileId = videoFile.file_id;
-            bot.getFileLink(fileId).then((link) => {
+            botInstance.getFileLink(fileId).then((link) => {
                 fileRequest(botInstance, chatId, resText, { id: fileId, type: 'video', file: link });
             });
             return;
@@ -660,17 +660,17 @@ bot.on('text', (ctx) => {
                 const textAlert = text.split('/alert:')[1];
                 for (const [chatKey, chatValue] of Object.entries(savedChats)) {
                     if (chatValue.isAuth) {
-                        bot.sendMessage(chatKey, 'Важное сообщение:' + '\n' + textAlert);
+                        botInstance.sendMessage(chatKey, 'Важное сообщение:' + '\n' + textAlert);
                     }
                 }
                 return;
             } else {
-                return bot.sendMessage(chatKey, 'Только для админов');
+                return botInstance.sendMessage(chatKey, 'Только для админов');
             }
         }
         if (savedChats[chatId] && savedChats[chatId].isAuth) {
             if (savedChats[chatId].gptType) {
-                answerGpt(chatId, resText);
+                answerGpt(botInstance, chatId, resText);
                 return;
             }
         } else {
@@ -735,7 +735,7 @@ bot.on('callback_query', async (ctx) => {
                 const text = savedChats[chatId].savedLastMessage;
                 if (text && savedChats[chatId].gptType.type === constants.GPT_TYPE.image.type) {
                     botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions);
-                    answerGpt(chatId, text);
+                    answerGpt(botInstance, chatId, text);
                 }
                 break;
 
