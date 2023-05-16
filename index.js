@@ -287,8 +287,21 @@ bot.on('callback_query', async (ctx) => {
     }
 });
 
+const cb = function(req, res) {
+    res.end(`${bot.options.username}`)
+}
+
 try {
-    bot.launch();
+    bot.launch(
+        process.env.URL
+    );
+    bot.launch({
+        webhook: {
+            domain: `${process.env.URL}`,
+            port: `${process.env.PORT}`,
+            cb
+        }
+    })
 } catch(e) {
     console.log('ERROR: ' + e)
 }
