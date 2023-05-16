@@ -705,10 +705,6 @@ bot.on('callback_query', async (ctx) => {
 
     console.log('@@@', savedChats[chatId])
 
-    return ctx.reply('Ничего..');
-
-    return;
-
     if (savedChats[chatId] && savedChats[chatId].isAuth) {
         switch(field) {
             // GPT
