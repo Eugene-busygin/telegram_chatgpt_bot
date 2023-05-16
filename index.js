@@ -703,7 +703,7 @@ bot.on('callback_query', async (ctx) => {
         }
     }
 
-    console.log('@@@', savedChats, msg, messageId, chatId, data, field, fieldId)
+    console.log('@@@', savedChats[chatId])
 
     return ctx.reply('Ничего..');
 
