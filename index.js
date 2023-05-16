@@ -84,7 +84,7 @@ const botAnswerCallBack = (chatId, callBackId, text) => {
     // });
 }
 
-const botEditMsgReplyMarkup = async (chatId, messageId) => {
+const botEditMsgReplyMarkup = async (bot, chatId, messageId) => {
     let choiceOptions = choiceTypeGptDefualtOptions;
     if (savedChats[chatId].gptType.type === constants.GPT_TYPE.dialog.type) {
         choiceOptions = choiceTypeGptDialogOptions;
@@ -108,7 +108,7 @@ const botEditMsgReplyMarkup = async (chatId, messageId) => {
     bot.sendMessage(chatId, `${savedChats[chatId].gptType.name} режим выбран, слушаю`);
 }
 
-const saveCurrentMsgToGpt = async (chatId, messageId, type) => {
+const saveCurrentMsgToGpt = async (bot, chatId, messageId, type) => {
     if (type.type === constants.GPT_TYPE.imageStablediffusion.type) {
         type = constants.GPT_TYPE.image;
         bot.sendMessage(chatId, `В разработке..`);
@@ -120,11 +120,11 @@ const saveCurrentMsgToGpt = async (chatId, messageId, type) => {
 
     if (type) {
         savedChats[chatId].gptType = type;
-        botEditMsgReplyMarkup(chatId, messageId);
+        botEditMsgReplyMarkup(bot, chatId, messageId);
         // botAnswerCallBack(chatId, callBackId, `${savedChats[chatId].gptType.name} режим выбран, слушаю`);
     } else {
         savedChats[chatId].gptType = constants.GPT_TYPE.default;
-        botEditMsgReplyMarkup(chatId, messageId);
+        botEditMsgReplyMarkup(bot, chatId, messageId);
         // botAnswerCallBack(chatId, callBackId, `${savedChats[chatId].gptType.name} режим выбран, слушаю`);
     }
 }
