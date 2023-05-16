@@ -474,39 +474,62 @@ const getStablediffusionImage = async (chatId, text, photo = null) => {
 
 // DEFAULT
 bot.help((ctx) => {
-    ctx.reply(constants.BOT_CHAT_COMMANDS);
+    return ctx.reply(chatId, 'Команды:' + '\n' + constants.BOT_CHAT_COMMANDS + '\n' + 'Версия бота: ' + constants.BOT_CHAT_VERSION);
 });
 
-// bot.start( async (ctx) => {
-//     const chatId = ctx.message.chat.id;
-//     savedChats = {};
+bot.start( async (ctx) => {
+    const msg = ctx.message;
+    const botInstance = ctx.telegram;
+    const chatId = ctx.message.chat.id;
 
-//     if (!savedChats[chatId]) {
-//         savedChats[chatId] = {
-//             gptType: constants.GPT_TYPE.default,
-//         };
-//     }
-//     try {
-//         await ctx.reply(`Приветствую Вас ${ctx.message.from.first_name ? ctx.message.from.first_name : 'гость'} в чате!`);
-//     } catch(e) {
-//         await ctx.telegram.sendMessage(chatId,
-//             `Что то пошло не так.. Пожалуйста, перезапустите бота`,
-//             Markup.inlineKeyboard(
-//                 [
-//                     [createBotButton('Перезапустить', 'is_restart')],
-//                 ]
-//             )
-//         );
-//         console.error(e);
-//     }
-// });
+    if (!savedChats[chatId]) {
+        savedChats[chatId] = {
+            gptType: constants.GPT_TYPE.default,
+            gptHistory: [],
+            gptHistoryToken: 0,
+            isAuth: process.env.ADMIN_ID !== chatId.toString() ? false : true,
+            savedLastMessage: null,
+            lastUpdateGptRequestTime: 0,
+            isBlockedGptRequest: false,
+        };
+    }
+    // await UserModel.create({chatId})
+    return botInstance.sendMessage(chatId, `Приветствуем Вас ${msg.from.first_name ? msg.from.first_name : 'гость'} в чате!`);
+});
 
 // AUTH
 bot.command('auth', async (ctx) => {
     const chatId = ctx.message.chat.id;
-    if (savedChats[chatId]) {
-        await ctx.reply(`Вы уже авторизованы в чате!`);
-        return;
+    const msg = ctx.message;
+    const botInstance = ctx.telegram;
+
+    if (process.env.ADMIN_ID === chatId.toString()) {
+        let userList = '';
+        authUserList.forEach(user => {
+            userList = userList + '\n' + user.name; 
+        });
+
+        const authList = [];
+        authRequestList.forEach(user => {
+            authList.push({ text: user.name, callback_data: user.chatId });
+        });
+        return botInstance.sendMessage(chatId,
+            `Список авторизованных${userList.length ? ':' + userList + '\n' : ' пуст' + '\n'}Список на авторизацию${authList.length ? ':' : ' пуст'}`, {
+            reply_markup: JSON.stringify({
+                inline_keyboard: [
+                    authList,
+                ]
+            })
+        });
+    } else {
+        if (savedChats[chatId].isAuth) {
+            return botInstance.sendMessage(chatId, `${msg.from.first_name}, Вы уже авторизованы в чате!`);
+        } else {
+            authRequestList.push({ name: msg.from.first_name, chatId: chatId.toString() });
+            const adminId = parseInt(process.env.ADMIN_ID, 10);
+            botInstance.sendMessage(adminId, `Новый запрос на авторизацию от ${msg.from.first_name}`);
+            return botInstance.sendMessage(chatId, `Запрос на авторизацию в чате отправлен`);
+        }
     }
     // sendGpt(chatId);
 });
@@ -514,26 +537,63 @@ bot.command('auth', async (ctx) => {
 // GPT
 bot.command('gpt_type', (ctx) => {
     const chatId = ctx.message.chat.id;
-    choiceTypeGpt(chatId)
+    const botInstance = ctx.telegram;
+
+    if (savedChats[chatId] && savedChats[chatId].isAuth) {
+        let choiceOptions = choiceTypeGptDefualtOptions;
+        if (savedChats[chatId].gptType.type === constants.GPT_TYPE.dialog.type) {
+            choiceOptions = choiceTypeGptDialogOptions;
+        }
+        if (savedChats[chatId].gptType.type === constants.GPT_TYPE.image.type) {
+            choiceOptions = choiceTypeGptImageOptions;
+        }
+        if (savedChats[chatId].gptType.type === constants.GPT_TYPE.audio.type) {
+            choiceOptions = choiceTypeGptAudioOptions;
+        }
+        if (savedChats[chatId].gptType.type === constants.GPT_TYPE.video.type) {
+            choiceOptions = choiceTypeGptVideoOptions;
+        }
+        if (savedChats[chatId].gptType.type === constants.GPT_TYPE.video_audio.type) {
+            choiceOptions = choiceTypeGptVideoAudioOptions;
+        }
+        return botInstance.sendMessage(chatId, `Выберите режим общения с ботом`, choiceOptions);
+    } else {
+        return botInstance.sendMessage(chatId, 'Похоже, что Вы не авторизованы');
+    }
 });
 
 // CHOICE TYPE GPT
-const choiceTypeGpt = async (chatId) => {
-    const defaultCatigories = [];
-    defaultCatigories.push(createBotButton('Обычный', 'default_type_gpt'));
-    defaultCatigories.push(createBotButton('Диалог', 'dialog_type_gpt'));
-    defaultCatigories.push(createBotButton('Изображение', 'image_type_gpt'));
-    // defaultCatigories.push(createBotButton('Изображение профи', 'image_profi_type_gpt'));
-    await bot.telegram.sendMessage(chatId,
-        `Выбран режим: "${savedChats[chatId].gptType.name} ✔". Выберите новый режим`,
-        Markup.inlineKeyboard(
-            [
-                defaultCatigories
-            ]
-        )
-    );
+// const choiceTypeGpt = async (chatId) => {
+//     const defaultCatigories = [];
+//     defaultCatigories.push(createBotButton('Обычный', 'default_type_gpt'));
+//     defaultCatigories.push(createBotButton('Диалог', 'dialog_type_gpt'));
+//     defaultCatigories.push(createBotButton('Изображение', 'image_type_gpt'));
+//     // defaultCatigories.push(createBotButton('Изображение профи', 'image_profi_type_gpt'));
+//     await bot.telegram.sendMessage(chatId,
+//         `Выбран режим: "${savedChats[chatId].gptType.name} ✔". Выберите новый режим`,
+//         Markup.inlineKeyboard(
+//             [
+//                 defaultCatigories
+//             ]
+//         )
+//     );
 
-}
+// }
+
+// Alert
+bot.command('alert:', (ctx) => {
+    if (process.env.ADMIN_ID === chatId.toString()) {
+        const textAlert = text.split('/alert:')[1];
+        for (const [chatKey, chatValue] of Object.entries(savedChats)) {
+            if (chatValue.isAuth) {
+                botInstance.sendMessage(chatKey, 'Важное сообщение:' + '\n' + textAlert);
+            }
+        }
+        return;
+    } else {
+        return botInstance.sendMessage(chatKey, 'Только для админов');
+    }
+});
 
 // TEXT ALL CALL_BACK
 bot.on('text', (ctx) => {
@@ -547,8 +607,6 @@ bot.on('text', (ctx) => {
     //         answerGpt(chatId, ctx.message.text)
     //     }
     // }
-
-    
 
     let replyToText = null;
     let resText = text;
@@ -611,101 +669,6 @@ bot.on('text', (ctx) => {
     }
 
     try {
-        if (text === '/start') {
-            if (!savedChats[chatId]) {
-                savedChats[chatId] = {
-                    gptType: constants.GPT_TYPE.default,
-                    gptHistory: [],
-                    gptHistoryToken: 0,
-                    isAuth: process.env.ADMIN_ID !== chatId.toString() ? false : true,
-                    savedLastMessage: null,
-                    lastUpdateGptRequestTime: 0,
-                    isBlockedGptRequest: false,
-                };
-            }
-            // await UserModel.create({chatId})
-            return botInstance.sendMessage(chatId, `Приветствуем Вас ${msg.from.first_name ? msg.from.first_name : 'гость'} в чате!`);
-        }
-        if (text.startsWith('/alert:')) {
-            if (process.env.ADMIN_ID === chatId.toString()) {
-                const textAlert = text.split('/alert:')[1];
-                for (const [chatKey, chatValue] of Object.entries(savedChats)) {
-                    if (chatValue.isAuth) {
-                        botInstance.sendMessage(chatKey, 'Важное сообщение:' + '\n' + textAlert);
-                    }
-                }
-                return;
-            } else {
-                return botInstance.sendMessage(chatKey, 'Только для админов');
-            }
-        }
-        if (text === '/info') {
-            // const user = await UserModel.findOne({chatId});
-            return botInstance.sendMessage(chatId, 'Команды:' + '\n' + constants.BOT_CHAT_COMMANDS + '\n' + 'Версия бота: ' + constants.BOT_CHAT_VERSION);
-        }
-        if (text === '/gpt_type') {
-            if (savedChats[chatId] && savedChats[chatId].isAuth) {
-                let choiceOptions = choiceTypeGptDefualtOptions;
-                if (savedChats[chatId].gptType.type === constants.GPT_TYPE.dialog.type) {
-                    choiceOptions = choiceTypeGptDialogOptions;
-                }
-                if (savedChats[chatId].gptType.type === constants.GPT_TYPE.image.type) {
-                    choiceOptions = choiceTypeGptImageOptions;
-                }
-                if (savedChats[chatId].gptType.type === constants.GPT_TYPE.audio.type) {
-                    choiceOptions = choiceTypeGptAudioOptions;
-                }
-                if (savedChats[chatId].gptType.type === constants.GPT_TYPE.video.type) {
-                    choiceOptions = choiceTypeGptVideoOptions;
-                }
-                if (savedChats[chatId].gptType.type === constants.GPT_TYPE.video_audio.type) {
-                    choiceOptions = choiceTypeGptVideoAudioOptions;
-                }
-                return botInstance.sendMessage(chatId, `Выберите режим общения с ботом`, choiceOptions);
-            } else {
-                return botInstance.sendMessage(chatId, 'Похоже, что Вы не авторизованы');
-            }
-            // const user = await UserModel.findOne({chatId})
-            // return bot.sendMessage(chatId, `Тебя зовут ${msg.from.first_name} ${msg.from.last_name}, в игре у тебя правильных ответов ${user.right}, неправильных ${user.wrong}`);
-        }
-        if (text === '/auth') {
-            if (process.env.ADMIN_ID === chatId.toString()) {
-                let userList = '';
-                authUserList.forEach(user => {
-                    userList = userList + '\n' + user.name; 
-                });
-
-                const authList = [];
-                authRequestList.forEach(user => {
-                    authList.push({ text: user.name, callback_data: user.chatId });
-                });
-                return botInstance.sendMessage(chatId,
-                    `Список авторизованных${userList.length ? ':' + userList + '\n' : ' пуст' + '\n'}Список на авторизацию${authList.length ? ':' : ' пуст'}`, {
-                    reply_markup: JSON.stringify({
-                        inline_keyboard: [
-                            authList,
-                        ]
-                    })
-                });
-            } else {
-                if (savedChats[chatId].isAuth) {
-                    return botInstance.sendMessage(chatId, `${msg.from.first_name}, Вы уже авторизованы в чате!`);
-                } else {
-                    authRequestList.push({ name: msg.from.first_name, chatId: chatId.toString() });
-                    const adminId = parseInt(process.env.ADMIN_ID, 10);
-                    botInstance.sendMessage(adminId, `Новый запрос на авторизацию от ${msg.from.first_name}`);
-                    return botInstance.sendMessage(chatId, `Запрос на авторизацию в чате отправлен`);
-                }
-            }
-            // const user = await UserModel.findOne({chatId})
-            // if (user) {
-            //     return bot.sendMessage(chatId, `${msg.from.first_name}, Вы уже авторизованы в чате!`);
-            // } else {
-            //     user.auth = true;
-            //     await user.save();
-            //     return bot.sendMessage(chatId, 'Поздравляю, теперь Вы авторизованы в чате!)');
-            // }
-        }
         if (savedChats[chatId] && savedChats[chatId].isAuth) {
             if (savedChats[chatId].gptType) {
                 answerGpt(chatId, resText);
