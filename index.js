@@ -104,7 +104,7 @@ const botEditMsgReplyMarkup = async (bot, chatId, messageId) => {
     if (savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
         choiceOptions = choiceTypeStablediffusionImageOptions;
     }
-    bot.editMessageReplyMarkup(emptyOptions, { chat_id: chatId, message_id: messageId });
+    bot.editMessageReplyMarkup(choiceOptions.reply_markup, { chat_id: chatId, message_id: messageId });
     // bot.editMessageReplyMarkup(chatId, messageId, null, choiceOptions);
     bot.sendMessage(chatId, `${savedChats[chatId].gptType.name} режим выбран, слушаю`);
 }
