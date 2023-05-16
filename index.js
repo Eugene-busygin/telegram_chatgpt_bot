@@ -687,7 +687,7 @@ bot.on('callback_query', async (ctx) => {
     const botInstance = ctx.telegram;
     const msg = ctx.update.callback_query.message;
     const messageId = msg.message_id;
-    const chatId = msge.chat.id;
+    const chatId = msg.chat.id;
     const data = ctx.update.callback_query.data;
 
     // ctx.telegram.answerCbQuery(ctx.callbackQuery.id);
