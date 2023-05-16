@@ -474,7 +474,7 @@ const getStablediffusionImage = async (chatId, text, photo = null) => {
 
 // DEFAULT
 bot.help((ctx) => {
-    return ctx.reply(chatId, 'Команды:' + '\n' + constants.BOT_CHAT_COMMANDS + '\n' + 'Версия бота: ' + constants.BOT_CHAT_VERSION);
+    return ctx.reply('Команды:' + '\n' + constants.BOT_CHAT_COMMANDS + '\n' + 'Версия бота: ' + constants.BOT_CHAT_VERSION);
 });
 
 bot.start( async (ctx) => {
