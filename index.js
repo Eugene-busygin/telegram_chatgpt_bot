@@ -58,22 +58,22 @@ const createBotButton = (text, callbackId) => {
     return Markup.button.callback(text, callbackId);
 }
 
-const fileRequest = (chatId, text, fileObj) => {
+const fileRequest = (bot, chatId, text, fileObj) => {
     if (savedChats[chatId].gptType) {
         if (savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
-            answerGpt(chatId, text, fileObj);
+            answerGpt(bot, chatId, text, fileObj);
         }
         if (savedChats[chatId].gptType.type === constants.GPT_TYPE.audio.type) {
-            answerGpt(chatId, text, fileObj);
+            answerGpt(bot, chatId, text, fileObj);
         }
         if (savedChats[chatId].gptType.type === constants.GPT_TYPE.video.type) {
-            answerGpt(chatId, text, fileObj);
+            answerGpt(bot, chatId, text, fileObj);
         }
         if (savedChats[chatId].gptType.type === constants.GPT_TYPE.video_audio.type) {
-            requestGpt(chatId, text, fileObj);
+            requestGpt(bot, chatId, text, fileObj);
         }
         if (savedChats[chatId].gptType.type === constants.GPT_TYPE.dialog.type) {
-            answerGpt(chatId, text, fileObj);
+            answerGpt(bot, chatId, text, fileObj);
         }
     }
 }
@@ -143,7 +143,7 @@ const updateGptHistory = (chatId, text) => {
     savedChats[chatId].gptHistory.push({role: "user", content: text});
 }
 
-const answerGpt = async (chatId, text, fileObj = null) => {
+const answerGpt = async (bot, chatId, text, fileObj = null) => {
     const currentTime = new Date().getTime();
 
     if (currentTime - savedChats[chatId].lastUpdateGptRequestTime > 2000 && !savedChats[chatId].isBlockedGptRequest) {
@@ -156,7 +156,7 @@ const answerGpt = async (chatId, text, fileObj = null) => {
         savedChats[chatId].isBlockedGptRequest = true;
 
         requestObj.limit = requestObj.limit + 1;
-        requestGpt(chatId, text, fileObj);
+        requestGpt(bot, chatId, text, fileObj);
         setTimeout(() => {
             requestObj.limit = requestObj.limit - 1;
         }, 21000);
@@ -180,7 +180,7 @@ const answerGpt = async (chatId, text, fileObj = null) => {
 //     });
 //   }
 
-const requestGpt = async (chatId, text, fileObj = null) => {
+const requestGpt = async (bot, chatId, text, fileObj = null) => {
     const type = savedChats[chatId].gptType.type;
     let answer = "Ничего не понятно..";
     let result = null;
@@ -246,7 +246,7 @@ const requestGpt = async (chatId, text, fileObj = null) => {
                 savedChats[chatId].isBlockedGptRequest = false;
                 if (fileObj.type === 'video') {
                     savedChats[chatId].isBlockedGptRequest = false;
-                    createAudioByVideoAndSendToChat(chatId, fileObj);
+                    createAudioByVideoAndSendToChat(bot, chatId, fileObj);
                     return;
                 }
                 break;
@@ -263,7 +263,7 @@ const requestGpt = async (chatId, text, fileObj = null) => {
             case constants.GPT_TYPE.imageStablediffusion.type:
                 savedChats[chatId].isBlockedGptRequest = false;
                 if (fileObj.type === 'photo') {
-                    return getStablediffusionImage(chatId, text, fileObj.file);
+                    return getStablediffusionImage(bot, chatId, text, fileObj.file);
                 }
             // case constants.GPT_TYPE.image.type:
             //     reloadGptHistory(chatId);
@@ -399,7 +399,7 @@ async function getOpenAITranscriptionTextByVideo(file) {
     return result.data.text;
 }
 
-async function createAudioByVideoAndSendToChat(chatId, file) {
+async function createAudioByVideoAndSendToChat(bot, chatId, file) {
     const fileName = 'audio.mp3';
     bot.downloadFile(file.id, '').then((filePath) => {
         ffmpeg(filePath)
@@ -411,7 +411,7 @@ async function createAudioByVideoAndSendToChat(chatId, file) {
     });
 }
 
-const getStablediffusionImage = async (chatId, text, photo = null) => {
+const getStablediffusionImage = async (bot, chatId, text, photo = null) => {
     const prompt = text;
     let js = null;
     let url = null;
@@ -604,7 +604,7 @@ bot.on('text', (ctx) => {
             const photo = msg.reply_to_message.photo.pop();
             const fileId = photo.file_id;
             botInstance.getFileLink(fileId).then((link) => {
-                fileRequest(chatId, resText, { id: fileId, type: 'photo', file: link });
+                fileRequest(botInstance, chatId, resText, { id: fileId, type: 'photo', file: link });
             });
             return;
         }
@@ -612,7 +612,7 @@ bot.on('text', (ctx) => {
             const audioFile = msg.reply_to_message.voice;
             const fileId = audioFile.file_id;
             botInstance.getFileLink(fileId).then((link) => {
-                fileRequest(chatId, resText, { id: fileId, type: 'audio', file: link });
+                fileRequest(botInstance, chatId, resText, { id: fileId, type: 'audio', file: link });
             });
             return;
         }
@@ -620,7 +620,7 @@ bot.on('text', (ctx) => {
             const videoFile = msg.reply_to_message.video;
             const fileId = videoFile.file_id;
             bot.getFileLink(fileId).then((link) => {
-                fileRequest(chatId, resText, { id: fileId, type: 'video', file: link });
+                fileRequest(botInstance, chatId, resText, { id: fileId, type: 'video', file: link });
             });
             return;
         }
@@ -630,7 +630,7 @@ bot.on('text', (ctx) => {
         const photo = msg.photo.pop();
         const fileId = photo.file_id;
         botInstance.getFileLink(fileId).then((link) => {
-            fileRequest(chatId, resText, { id: fileId, type: 'photo', file: link });
+            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'photo', file: link });
         });
         return;
     }
@@ -639,7 +639,7 @@ bot.on('text', (ctx) => {
         const audioFile = msg.voice;
         const fileId = audioFile.file_id;
         botInstance.getFileLink(fileId).then((link) => {
-            fileRequest(chatId, resText, { id: fileId, type: 'audio', file: link });
+            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'audio', file: link });
         });
         return;
     }
@@ -648,7 +648,7 @@ bot.on('text', (ctx) => {
         const videoFile = msg.video;
         const fileId = videoFile.file_id;
         botInstance.getFileLink(fileId).then((link) => {
-            fileRequest(chatId, resText, { id: fileId, type: 'video', file: link });
+            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'video', file: link });
         });
         return;
     }
@@ -708,27 +708,27 @@ bot.on('callback_query', async (ctx) => {
             // GPT
             case '/default_type_gpt':
                 reloadGptHistory(chatId);
-                saveCurrentMsgToGpt(chatId, messageId, constants.GPT_TYPE.default);
+                saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.default);
                 break;
             case '/dialog_type_gpt':
                 reloadGptHistory(chatId, true);
-                saveCurrentMsgToGpt(chatId, messageId, constants.GPT_TYPE.dialog);
+                saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.dialog);
                 break;
             case '/image_type_gpt':
                 reloadGptHistory(chatId);
-                saveCurrentMsgToGpt(chatId, messageId, constants.GPT_TYPE.image);
+                saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.image);
                 break;
             case '/audio_type_gpt':
                 reloadGptHistory(chatId);
-                saveCurrentMsgToGpt(chatId, messageId, constants.GPT_TYPE.audio);
+                saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.audio);
                 break;
             case '/video_type_gpt':
                 reloadGptHistory(chatId);
-                saveCurrentMsgToGpt(chatId, messageId, constants.GPT_TYPE.video);
+                saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.video);
                 break;
             case '/video_audio_type_gpt':
                 reloadGptHistory(chatId);
-                saveCurrentMsgToGpt(chatId, messageId, constants.GPT_TYPE.video_audio);
+                saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.video_audio);
                 break;
             case '/more_gpt_image':
                 const text = savedChats[chatId].savedLastMessage;
@@ -741,7 +741,7 @@ bot.on('callback_query', async (ctx) => {
             // Stablediffusion    
             case '/image_type_stablediffusion':
                 reloadGptHistory(chatId);
-                saveCurrentMsgToGpt(chatId, messageId, constants.GPT_TYPE.imageStablediffusion);
+                saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.imageStablediffusion);
                 break;
             case '/more_stablediffusion_image':
                 return botInstance.sendMessage(chatId, 'Скоро появится');
@@ -749,7 +749,7 @@ bot.on('callback_query', async (ctx) => {
                 const t = savedChats[chatId].savedLastMessage;
                 if (t && savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
                     botInstance.editMessageReplyMarkup(emptyOptions, { chat_id: chatId, message_id: messageId });
-                    getStablediffusionImage(chatId, t);
+                    getStablediffusionImage(botInstance, chatId, t);
                 }
                 break;
 
