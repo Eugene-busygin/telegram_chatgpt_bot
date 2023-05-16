@@ -580,21 +580,6 @@ bot.command('gpt_type', (ctx) => {
 
 // }
 
-// Alert
-bot.command('alert:', (ctx) => {
-    if (process.env.ADMIN_ID === chatId.toString()) {
-        const textAlert = text.split('/alert:')[1];
-        for (const [chatKey, chatValue] of Object.entries(savedChats)) {
-            if (chatValue.isAuth) {
-                botInstance.sendMessage(chatKey, 'Важное сообщение:' + '\n' + textAlert);
-            }
-        }
-        return;
-    } else {
-        return botInstance.sendMessage(chatKey, 'Только для админов');
-    }
-});
-
 // TEXT ALL CALL_BACK
 bot.on('text', (ctx) => {
     const msg = ctx.message;
@@ -669,6 +654,19 @@ bot.on('text', (ctx) => {
     }
 
     try {
+        if (text.startsWith('/alert:')) {
+            if (process.env.ADMIN_ID === chatId.toString()) {
+                const textAlert = text.split('/alert:')[1];
+                for (const [chatKey, chatValue] of Object.entries(savedChats)) {
+                    if (chatValue.isAuth) {
+                        bot.sendMessage(chatKey, 'Важное сообщение:' + '\n' + textAlert);
+                    }
+                }
+                return;
+            } else {
+                return bot.sendMessage(chatKey, 'Только для админов');
+            }
+        }
         if (savedChats[chatId] && savedChats[chatId].isAuth) {
             if (savedChats[chatId].gptType) {
                 answerGpt(chatId, resText);
