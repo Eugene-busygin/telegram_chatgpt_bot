@@ -3,8 +3,8 @@ require('dotenv').config();
 const constants = require('./constants');
 
 // TELEGRAM
-const bot = new Telegraf(process.env.BOT_TOKEN);
 const { Telegraf, Markup } = require('telegraf');
+const bot = new Telegraf(process.env.BOT_TOKEN);
 
 const Replicate = require('replicate').default;
 
