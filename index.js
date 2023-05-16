@@ -104,7 +104,8 @@ const botEditMsgReplyMarkup = async (bot, chatId, messageId) => {
     if (savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
         choiceOptions = choiceTypeStablediffusionImageOptions;
     }
-    bot.editMessageReplyMarkup(chatId, messageId, null, choiceOptions);
+    bot.editMessageReplyMarkup(emptyOptions, { chat_id: chatId, message_id: messageId });
+    // bot.editMessageReplyMarkup(chatId, messageId, null, choiceOptions);
     bot.sendMessage(chatId, `${savedChats[chatId].gptType.name} режим выбран, слушаю`);
 }
 
@@ -130,7 +131,6 @@ const saveCurrentMsgToGpt = async (bot, chatId, messageId, type) => {
 }
 
 const reloadGptHistory = async (bot, chatId, isSendMsg = false) => {
-
     const tokens = savedChats[chatId].gptHistoryToken;
     savedChats[chatId].gptHistory = [];
     savedChats[chatId].gptHistoryToken = 0;
