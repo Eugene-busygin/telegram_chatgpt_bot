@@ -477,29 +477,29 @@ bot.help((ctx) => {
     ctx.reply(constants.BOT_CHAT_COMMANDS);
 });
 
-bot.start( async (ctx) => {
-    const chatId = ctx.message.chat.id;
-    savedChats = {};
+// bot.start( async (ctx) => {
+//     const chatId = ctx.message.chat.id;
+//     savedChats = {};
 
-    if (!savedChats[chatId]) {
-        savedChats[chatId] = {
-            gptType: constants.GPT_TYPE.default,
-        };
-    }
-    try {
-        await ctx.reply(`Приветствую Вас ${ctx.message.from.first_name ? ctx.message.from.first_name : 'гость'} в чате!`);
-    } catch(e) {
-        await ctx.telegram.sendMessage(chatId,
-            `Что то пошло не так.. Пожалуйста, перезапустите бота`,
-            Markup.inlineKeyboard(
-                [
-                    [createBotButton('Перезапустить', 'is_restart')],
-                ]
-            )
-        );
-        console.error(e);
-    }
-});
+//     if (!savedChats[chatId]) {
+//         savedChats[chatId] = {
+//             gptType: constants.GPT_TYPE.default,
+//         };
+//     }
+//     try {
+//         await ctx.reply(`Приветствую Вас ${ctx.message.from.first_name ? ctx.message.from.first_name : 'гость'} в чате!`);
+//     } catch(e) {
+//         await ctx.telegram.sendMessage(chatId,
+//             `Что то пошло не так.. Пожалуйста, перезапустите бота`,
+//             Markup.inlineKeyboard(
+//                 [
+//                     [createBotButton('Перезапустить', 'is_restart')],
+//                 ]
+//             )
+//         );
+//         console.error(e);
+//     }
+// });
 
 // AUTH
 bot.command('auth', async (ctx) => {
@@ -604,13 +604,28 @@ bot.on('text', (ctx) => {
     if (msg.video) {
         const videoFile = msg.video;
         const fileId = videoFile.file_id;
-        bot.getFileLink(fileId).then((link) => {
+        botInstance.getFileLink(fileId).then((link) => {
             fileRequest(chatId, resText, { id: fileId, type: 'video', file: link });
         });
         return;
     }
 
     try {
+        if (text === '/start') {
+            if (!savedChats[chatId]) {
+                savedChats[chatId] = {
+                    gptType: constants.GPT_TYPE.default,
+                    gptHistory: [],
+                    gptHistoryToken: 0,
+                    isAuth: process.env.ADMIN_ID !== chatId.toString() ? false : true,
+                    savedLastMessage: null,
+                    lastUpdateGptRequestTime: 0,
+                    isBlockedGptRequest: false,
+                };
+            }
+            // await UserModel.create({chatId})
+            return botInstance.sendMessage(chatId, `Приветствуем Вас ${msg.from.first_name ? msg.from.first_name : 'гость'} в чате!`);
+        }
         if (text.startsWith('/alert:')) {
             if (process.env.ADMIN_ID === chatId.toString()) {
                 const textAlert = text.split('/alert:')[1];
