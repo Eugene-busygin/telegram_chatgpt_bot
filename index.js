@@ -129,7 +129,8 @@ const saveCurrentMsgToGpt = async (bot, chatId, messageId, type) => {
     }
 }
 
-const reloadGptHistory = async (chatId, isSendMsg = false) => {
+const reloadGptHistory = async (bot, chatId, isSendMsg = false) => {
+
     const tokens = savedChats[chatId].gptHistoryToken;
     savedChats[chatId].gptHistory = [];
     savedChats[chatId].gptHistoryToken = 0;
@@ -707,27 +708,27 @@ bot.on('callback_query', async (ctx) => {
         switch(field) {
             // GPT
             case '/default_type_gpt':
-                reloadGptHistory(chatId);
+                reloadGptHistory(botInstance, chatId);
                 saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.default);
                 break;
             case '/dialog_type_gpt':
-                reloadGptHistory(chatId, true);
+                reloadGptHistory(botInstance, chatId, true);
                 saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.dialog);
                 break;
             case '/image_type_gpt':
-                reloadGptHistory(chatId);
+                reloadGptHistory(botInstance, chatId);
                 saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.image);
                 break;
             case '/audio_type_gpt':
-                reloadGptHistory(chatId);
+                reloadGptHistory(botInstance, chatId);
                 saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.audio);
                 break;
             case '/video_type_gpt':
-                reloadGptHistory(chatId);
+                reloadGptHistory(botInstance, chatId);
                 saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.video);
                 break;
             case '/video_audio_type_gpt':
-                reloadGptHistory(chatId);
+                reloadGptHistory(botInstance, chatId);
                 saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.video_audio);
                 break;
             case '/more_gpt_image':
@@ -740,7 +741,7 @@ bot.on('callback_query', async (ctx) => {
 
             // Stablediffusion    
             case '/image_type_stablediffusion':
-                reloadGptHistory(chatId);
+                reloadGptHistory(botInstance, chatId);
                 saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.imageStablediffusion);
                 break;
             case '/more_stablediffusion_image':
@@ -755,7 +756,7 @@ bot.on('callback_query', async (ctx) => {
 
             case '/reload_gpt_dialog':
                 botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions);
-                reloadGptHistory(chatId, true);
+                reloadGptHistory(botInstance, chatId, true);
                 break;
 
             default:
