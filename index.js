@@ -292,9 +292,6 @@ const cb = function(req, res) {
 }
 
 try {
-    bot.launch(
-        process.env.URL
-    );
     bot.launch({
         webhook: {
             domain: `${process.env.URL}`,
