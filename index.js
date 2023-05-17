@@ -581,19 +581,36 @@ bot.command('gpt_type', (ctx) => {
 
 // }
 
+bot.command('photo', (ctx) => {
+    console.log('@@', ctx);
+    ctx.replyWithPhoto({ url: PhotoURL });
+})
+
 bot.on('voice', (ctx) => {
+    console.log('@@', ctx);
     return ctx.reply('Я пока не умею работать с voice');
 });
 
 bot.on('audio', (ctx) => {
+    console.log('@@', ctx);
     return ctx.reply('Я пока не умею работать с audio');
 });
 
 bot.on('video', (ctx) => {
+    console.log('@@', ctx);
+    // if (msg.video) {
+    //     const videoFile = msg.video;
+    //     const fileId = videoFile.file_id;
+    //     botInstance.getFileLink(fileId).then((link) => {
+    //         fileRequest(botInstance, chatId, resText, { id: fileId, type: 'video', file: link });
+    //     });
+    //     return;
+    // }
     return ctx.reply('Я пока не умею работать с video');
 });
 
 bot.on('document', (ctx) => {
+    console.log('@@', ctx);
     return ctx.reply('Я пока не умею работать с документами');
 });
 
@@ -661,14 +678,7 @@ bot.on('text', (ctx) => {
         return;
     }
 
-    if (msg.video) {
-        const videoFile = msg.video;
-        const fileId = videoFile.file_id;
-        botInstance.getFileLink(fileId).then((link) => {
-            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'video', file: link });
-        });
-        return;
-    }
+    
 
     try {
         if (text.startsWith('/alert:')) {
