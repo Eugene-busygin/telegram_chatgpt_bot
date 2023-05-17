@@ -684,6 +684,7 @@ bot.on('text', (ctx) => {
     const text = msg.text;
     const botInstance = ctx.telegram;
 
+    console.log('@@', msg, msg.reply_to_message, chatId, text);
     // if (savedChats[chatId]) {
     //     if (savedChats[chatId].gptType) {
     //         answerGpt(chatId, ctx.message.text)
