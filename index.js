@@ -617,11 +617,22 @@ bot.on('voice', (ctx) => {
 });
 
 bot.on('audio', (ctx) => {
-    console.log('@@', ctx);
+    
     const msg = ctx.message;
     const chatId = msg.chat.id;
     const botInstance = ctx.telegram;
-    
+    console.log('@@', ctx, msg.document);
+    return;
+    if (msg.document) {
+        const audioFile = msg.voice;
+        const fileId = audioFile.file_id;
+        botInstance.getFileLink(fileId).then((link) => {
+            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'audio', file: link });
+        });
+        return;
+    } else {
+        return ctx.reply('Я пока не умею работать с voice');
+    }
     return ctx.reply('Я пока не умею работать с audio');
 });
 
@@ -647,6 +658,7 @@ bot.on('document', (ctx) => {
     const msg = ctx.message;
     const chatId = msg.chat.id;
     const botInstance = ctx.telegram;
+
     return ctx.reply('Я пока не умею работать с документами');
 });
 
