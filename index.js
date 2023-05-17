@@ -590,7 +590,7 @@ bot.command('photo', (ctx) => {
         const photo = msg.photo.pop();
         const fileId = photo.file_id;
         botInstance.getFileLink(fileId).then((link) => {
-            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'photo', file: link });
+            fileRequest(botInstance, chatId, '', { id: fileId, type: 'photo', file: link });
         });
         return;
     } else {
@@ -608,7 +608,7 @@ bot.on('voice', (ctx) => {
         const audioFile = msg.voice;
         const fileId = audioFile.file_id;
         botInstance.getFileLink(fileId).then((link) => {
-            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'audio', file: link });
+            fileRequest(botInstance, chatId, '', { id: fileId, type: 'audio', file: link });
         });
         return;
     } else {
@@ -625,7 +625,7 @@ bot.on('audio', (ctx) => {
         const audioFile = msg.audio;
         const fileId = audioFile.file_id;
         botInstance.getFileLink(fileId).then((link) => {
-            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'audio', file: link });
+            fileRequest(botInstance, chatId, '', { id: fileId, type: 'audio', file: link });
         });
         return;
     } else {
@@ -643,7 +643,7 @@ bot.on('video', (ctx) => {
         const videoFile = msg.video;
         const fileId = videoFile.file_id;
         botInstance.getFileLink(fileId).then((link) => {
-            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'video', file: link });
+            fileRequest(botInstance, chatId, '', { id: fileId, type: 'video', file: link });
         });
         return;
     } else {
@@ -652,21 +652,27 @@ bot.on('video', (ctx) => {
 });
 
 bot.on('document', (ctx) => {
-    
     const msg = ctx.message;
     const chatId = msg.chat.id;
     const botInstance = ctx.telegram;
-    console.log('@@', msg.document);
-    return;
-    if (msg.voice) {
-        const audioFile = msg.voice;
-        const fileId = audioFile.file_id;
-        botInstance.getFileLink(fileId).then((link) => {
-            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'audio', file: link });
-        });
+    console.log('@@', msg, msg.document);
+
+    if (msg.document) {
+        const fileName = msg.document.file_name;
+        const mimeType = msg.document.mime_type;
+        switch(mimeType) {
+            case 'audio/mpeg':
+                const audioFile = msg.document;
+                const fileId = audioFile.file_id;
+                botInstance.getFileLink(fileId).then((link) => {
+                    fileRequest(botInstance, chatId, '', { id: fileId, type: 'audio', file: link });
+                });
+                break;
+        }
+        
         return;
     } else {
-        return ctx.reply('Я пока не умею работать с voice');
+        return ctx.reply('Я пока не умею работать с документами');
     }
     return ctx.reply('Я пока не умею работать с документами');
 });
