@@ -581,6 +581,22 @@ bot.command('gpt_type', (ctx) => {
 
 // }
 
+bot.on('voice', (ctx) => {
+    return ctx.reply('Я пока не умею работать с voice');
+});
+
+bot.on('audio', (ctx) => {
+    return ctx.reply('Я пока не умею работать с audio');
+});
+
+bot.on('video', (ctx) => {
+    return ctx.reply('Я пока не умею работать с video');
+});
+
+bot.on('document', (ctx) => {
+    return ctx.reply('Я пока не умею работать с документами');
+});
+
 // TEXT ALL CALL_BACK
 bot.on('text', (ctx) => {
     const msg = ctx.message;
