@@ -371,7 +371,8 @@ async function getOpenAITranscriptionText(file) {
 
 function reduceBitrateByBotFile(bot, file) {
     return new Promise(async (resolve, reject) => {
-        const filePath = await bot.downloadFile(file.id, '');
+        // const filePath = await bot.downloadFile(file.id, '');
+        const filePath = await bot.getFile(file.id);
         const outputChunks = [];
         ffmpeg(filePath)
         .outputOptions('-f mp3')
@@ -402,7 +403,8 @@ async function getOpenAITranscriptionTextByVideo(bot, file) {
 
 async function createAudioByVideoAndSendToChat(bot, chatId, file) {
     const fileName = 'audio.mp3';
-    bot.downloadFile(file.id, '').then((filePath) => {
+    // bot.downloadFile(file.id, '').then((filePath) => {
+    bot.getFile(file.id).then((filePath) => {
         ffmpeg(filePath)
         .outputOptions('-f mp3')
         .saveToFile(fileName)
