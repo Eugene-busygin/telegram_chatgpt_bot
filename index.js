@@ -583,34 +583,70 @@ bot.command('gpt_type', (ctx) => {
 
 bot.command('photo', (ctx) => {
     console.log('@@', ctx);
-    ctx.replyWithPhoto({ url: PhotoURL });
+    const msg = ctx.message;
+    const chatId = msg.chat.id;
+    const botInstance = ctx.telegram;
+    if (msg.photo && msg.photo.length) {
+        const photo = msg.photo.pop();
+        const fileId = photo.file_id;
+        botInstance.getFileLink(fileId).then((link) => {
+            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'photo', file: link });
+        });
+        return;
+    } else {
+        return ctx.reply('Я пока не умею работать с photo');
+    }
+    // return ctx.replyWithPhoto({ url: PhotoURL });
 })
 
 bot.on('voice', (ctx) => {
     console.log('@@', ctx);
-    return ctx.reply('Я пока не умею работать с voice');
+    const msg = ctx.message;
+    const chatId = msg.chat.id;
+    const botInstance = ctx.telegram;
+    if (msg.voice) {
+        const audioFile = msg.voice;
+        const fileId = audioFile.file_id;
+        botInstance.getFileLink(fileId).then((link) => {
+            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'audio', file: link });
+        });
+        return;
+    } else {
+        return ctx.reply('Я пока не умею работать с voice');
+    }
 });
 
 bot.on('audio', (ctx) => {
     console.log('@@', ctx);
+    const msg = ctx.message;
+    const chatId = msg.chat.id;
+    const botInstance = ctx.telegram;
+    
     return ctx.reply('Я пока не умею работать с audio');
 });
 
 bot.on('video', (ctx) => {
     console.log('@@', ctx);
-    // if (msg.video) {
-    //     const videoFile = msg.video;
-    //     const fileId = videoFile.file_id;
-    //     botInstance.getFileLink(fileId).then((link) => {
-    //         fileRequest(botInstance, chatId, resText, { id: fileId, type: 'video', file: link });
-    //     });
-    //     return;
-    // }
-    return ctx.reply('Я пока не умею работать с video');
+    const msg = ctx.message;
+    const chatId = msg.chat.id;
+    const botInstance = ctx.telegram;
+    if (msg.video) {
+        const videoFile = msg.video;
+        const fileId = videoFile.file_id;
+        botInstance.getFileLink(fileId).then((link) => {
+            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'video', file: link });
+        });
+        return;
+    } else {
+        return ctx.reply('Я пока не умею работать с video');
+    }
 });
 
 bot.on('document', (ctx) => {
     console.log('@@', ctx);
+    const msg = ctx.message;
+    const chatId = msg.chat.id;
+    const botInstance = ctx.telegram;
     return ctx.reply('Я пока не умею работать с документами');
 });
 
@@ -659,26 +695,6 @@ bot.on('text', (ctx) => {
             return;
         }
     }
-
-    if (msg.photo && msg.photo.length) {
-        const photo = msg.photo.pop();
-        const fileId = photo.file_id;
-        botInstance.getFileLink(fileId).then((link) => {
-            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'photo', file: link });
-        });
-        return;
-    }
-
-    if (msg.voice) {
-        const audioFile = msg.voice;
-        const fileId = audioFile.file_id;
-        botInstance.getFileLink(fileId).then((link) => {
-            fileRequest(botInstance, chatId, resText, { id: fileId, type: 'audio', file: link });
-        });
-        return;
-    }
-
-    
 
     try {
         if (text.startsWith('/alert:')) {
