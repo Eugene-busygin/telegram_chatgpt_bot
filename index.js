@@ -198,7 +198,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                     }
                     if (fileObj.type === 'video') {
                         savedChats[chatId].isBlockedGptRequest = false;
-                        text = text + ' ' + await getOpenAITranscriptionTextByVideo(fileObj);
+                        text = text + ' ' + await getOpenAITranscriptionTextByVideo(bot, fileObj);
                     }
                 }
                 if (savedChats[chatId].gptHistoryToken + text.length > constants.GPT_TYPE.maxToken) {
@@ -239,7 +239,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 savedChats[chatId].isBlockedGptRequest = false;
                 if (fileObj.type === 'video') {
                     savedChats[chatId].isBlockedGptRequest = false;
-                    answer = await getOpenAITranscriptionTextByVideo(fileObj);
+                    answer = await getOpenAITranscriptionTextByVideo(bot, fileObj);
                 }
                 break;
             case constants.GPT_TYPE.video_audio.type:
@@ -369,7 +369,7 @@ async function getOpenAITranscriptionText(file) {
     return result.data.text;
 }
 
-function reduceBitrateByBotFile(file) {
+function reduceBitrateByBotFile(bot, file) {
     return new Promise(async (resolve, reject) => {
         const filePath = await bot.downloadFile(file.id, '');
         const outputChunks = [];
@@ -389,8 +389,8 @@ function reduceBitrateByBotFile(file) {
     });
 }
 
-async function getOpenAITranscriptionTextByVideo(file) {
-    const resizedBuffer = await reduceBitrateByBotFile(file);
+async function getOpenAITranscriptionTextByVideo(bot, file) {
+    const resizedBuffer = await reduceBitrateByBotFile(bot, file);
     const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
 
     const result = await openai.createTranscription(
@@ -660,14 +660,21 @@ bot.on('document', (ctx) => {
     if (msg.document) {
         const fileName = msg.document.file_name;
         const mimeType = msg.document.mime_type;
+        let fileId = null;
         switch(mimeType) {
             case 'audio/mpeg':
                 const audioFile = msg.document;
-                const fileId = audioFile.file_id;
+                fileId = audioFile.file_id;
                 botInstance.getFileLink(fileId).then((link) => {
                     fileRequest(botInstance, chatId, '', { id: fileId, type: 'audio', file: link });
                 });
                 break;
+            case 'video/mp4':
+                const videoFile = msg.document;
+                fileId = videoFile.file_id;
+                botInstance.getFileLink(fileId).then((link) => {
+                    fileRequest(botInstance, chatId, '', { id: fileId, type: 'video', file: link });
+                });        
         }
         
         return;
@@ -684,7 +691,7 @@ bot.on('text', (ctx) => {
     const text = msg.text;
     const botInstance = ctx.telegram;
 
-    console.log('@@', msg, msg.reply_to_message, chatId, text);
+    console.log('@@', msg, msg.reply_to_message);
     // if (savedChats[chatId]) {
     //     if (savedChats[chatId].gptType) {
     //         answerGpt(chatId, ctx.message.text)
