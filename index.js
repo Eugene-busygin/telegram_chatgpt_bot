@@ -69,7 +69,7 @@ const pingBot = async () => {
             () => {
                 console.log(`Ping on port ${pprocess.env.PORT}`);
             }
-        ), 899900
+        ), 800000
     );
 }
 
