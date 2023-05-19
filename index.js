@@ -65,7 +65,7 @@ const pingBot = async () => {
         () => request(
             process.env.URL,
             () => {
-                console.log(`Ping on port ${port}`);
+                console.log(`Ping on port ${pprocess.env.PORT}`);
             }
         ), 899900
     );
