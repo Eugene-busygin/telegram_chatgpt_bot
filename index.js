@@ -54,8 +54,21 @@ const requestObj = {
     limit: 0,
 }
 
+let timerPingId = null;
+
 const createBotButton = (text, callbackId) => {
     return Markup.button.callback(text, callbackId);
+}
+
+const pingBot = async () => {
+    timerPingId = setInterval(
+        () => request(
+            process.env.URL,
+            () => {
+                console.log(`Ping on port ${port}`);
+            }
+        ), 899900
+    );
 }
 
 const fileRequest = (bot, chatId, text, fileObj) => {
@@ -878,8 +891,13 @@ try {
             port: `${process.env.PORT}`,
             cb
         }
-    })
+    });
+    if (timerPingId) {
+        timerPingId = null;
+    }
+    pingBot();
 } catch(e) {
+    timerPingId = null;
     console.log('ERROR: ' + e)
 }
 

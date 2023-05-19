@@ -19,6 +19,7 @@
     "telegraf": "^4.12.2",
     "ffmpeg-static": "^5.1.0",
     "fluent-ffmpeg": "^2.1.2",
-    "sequelize": "^6.6.2"
+    "sequelize": "^6.6.2",
+    "request": "^2.88.2"
   }
 }
