@@ -390,11 +390,16 @@ async function getOpenAITranscriptionText(file) {
 function reduceBitrateByBotFile(bot, fileObj) {
     return new Promise(async (resolve, reject) => {
         // const file = await fetch(fileObj.file.href).then(res => res.blob());
+        const file = await axios({
+            method: 'get',
+            url: fileObj.file.href,
+            responseType: 'stream',
+        });
         console.log('@@1', fileObj.file);
-        let videoPath = await fileManager.downloadFile(fileObj.file.pathname, fileObj.uniqueId, 'Video');
+        // let videoPath = await fileManager.downloadFile(fileObj.file.pathname, fileObj.uniqueId, 'Video');
         // const filePath = await bot.downloadFile(file.id, '');
         const outputChunks = [];
-        ffmpeg(videoPath)
+        ffmpeg(file.data)
             .outputOptions('-f mp3')
             .on("error", reject)
             .on("end", () => resolve(Buffer.concat(outputChunks)))
@@ -423,17 +428,21 @@ async function getOpenAITranscriptionTextByVideo(bot, file) {
 
 async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
     console.log('@@2', fileObj.file);
-    let videoPath = await fileManager.downloadFile(fileObj.file.pathname, fileObj.uniqueId, 'Video');
-
+    // let videoPath = await fileManager.downloadFile(fileObj.file.pathname, fileObj.uniqueId, 'Video');
+    const file = await axios({
+        method: 'get',
+        url: fileObj.file.href,
+        responseType: 'stream',
+    });
     // const file = await fetch(fileObj.file.href).then(res => res.blob());
 
     const fileName = 'audio.mp3';
-    ffmpeg(videoPath)
+    ffmpeg(file.data)
         .outputOptions('-f mp3')
         .saveToFile(fileName)
         .on('end', async () => {
             await bot.sendAudio(chatId, fileName);
-            fileManager.deleteFile(videoPath);
+            // fileManager.deleteFile(videoPath);
         });
     // bot.downloadFile(file.id, '').then((filePath) => {
         
