@@ -16,7 +16,7 @@
     "ffmpeg-static": "^5.1.0",
     "fluent-ffmpeg": "^2.1.2",
     "midjourney-client": "^1.0.8",
-    "node-fetch": "^3.3.1",
+    "node-fetch": "^2.6.1",
     "openai": "^3.2.1",
     "replicate": "^0.10.0",
     "request": "^2.88.2",
