@@ -391,7 +391,7 @@ function reduceBitrateByBotFile(bot, fileObj) {
     return new Promise(async (resolve, reject) => {
         // const file = await fetch(fileObj.file.href).then(res => res.blob());
         console.log('@@1', fileObj.file);
-        let videoPath = await fileManager.downloadFile(fileObj.file.filepath, fileObj.uniqueId, 'Video');
+        let videoPath = await fileManager.downloadFile(fileObj.file.pathname, fileObj.uniqueId, 'Video');
         // const filePath = await bot.downloadFile(file.id, '');
         const outputChunks = [];
         ffmpeg(videoPath)
@@ -423,7 +423,7 @@ async function getOpenAITranscriptionTextByVideo(bot, file) {
 
 async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
     console.log('@@2', fileObj.file);
-    let videoPath = await fileManager.downloadFile(fileObj.file.filepath, fileObj.uniqueId, 'Video');
+    let videoPath = await fileManager.downloadFile(fileObj.file.pathname, fileObj.uniqueId, 'Video');
 
     // const file = await fetch(fileObj.file.href).then(res => res.blob());
 
