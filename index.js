@@ -421,7 +421,7 @@ async function getOpenAITranscriptionTextByVideo(bot, file) {
 }
 
 async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
-    let videoPath = await fileManager.downloadFile(fileObj.file, fileObj.uniqueId, 'Video');
+    let videoPath = await fileManager.downloadFile(fileObj.file.href, fileObj.uniqueId, 'Video');
 
     const fileName = 'audio.mp3';
     ffmpeg(videoPath)
