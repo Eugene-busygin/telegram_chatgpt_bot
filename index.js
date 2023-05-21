@@ -421,7 +421,7 @@ async function getOpenAITranscriptionTextByVideo(bot, file) {
 }
 
 async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
-    let videoPath = await fileManager.downloadFile(fileObj.file, fileObj.id, 'Video');
+    let videoPath = await fileManager.downloadFile(fileObj.file, fileObj.uniqueId, 'Video');
 
     const fileName = 'audio.mp3';
     ffmpeg(videoPath)
@@ -662,13 +662,11 @@ bot.on('video', (ctx) => {
     if (msg.video) {
         const videoFile = msg.video;
 
-        const { file_id: fileVidorId } = videoFile;
+        const { file_id: fileId } = videoFile;
         const { file_unique_id: fileUniqueId } = videoFile;
 
-        console.log('@@', fileVidorId, fileUniqueId);
-        const fileId = videoFile.file_id;
         botInstance.getFileLink(fileId).then((link) => {
-            fileRequest(botInstance, chatId, '', { id: fileId, type: 'video', file: link });
+            fileRequest(botInstance, chatId, '', {uniqueId: fileUniqueId, id: fileId, type: 'video', file: link });
         });
         return;
     } else {
@@ -695,9 +693,11 @@ bot.on('document', (ctx) => {
                 break;
             case 'video/mp4':
                 const videoFile = msg.document;
-                fileId = videoFile.file_id;
+                const { file_id: fileId } = videoFile;
+                const { file_unique_id: fileUniqueId } = videoFile;
+
                 botInstance.getFileLink(fileId).then((link) => {
-                    fileRequest(botInstance, chatId, '', { id: fileId, type: 'video', file: link });
+                    fileRequest(botInstance, chatId, '', {uniqueId: fileUniqueId, id: fileId, type: 'video', file: link });
                 });        
         }
         
@@ -746,9 +746,10 @@ bot.on('text', (ctx) => {
         }
         if (msg.reply_to_message.video) {
             const videoFile = msg.reply_to_message.video;
-            const fileId = videoFile.file_id;
+            const { file_id: fileId } = videoFile;
+            const { file_unique_id: fileUniqueId } = videoFile;
             botInstance.getFileLink(fileId).then((link) => {
-                fileRequest(botInstance, chatId, resText, { id: fileId, type: 'video', file: link });
+                fileRequest(botInstance, chatId, resText, {uniqueId: fileUniqueId, id: fileId, type: 'video', file: link });
             });
             return;
         }
