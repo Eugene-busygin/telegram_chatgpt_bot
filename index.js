@@ -387,10 +387,11 @@ async function getOpenAITranscriptionText(file) {
 
 function reduceBitrateByBotFile(bot, fileObj) {
     return new Promise(async (resolve, reject) => {
-        const file = await fetch(fileObj.file).then(res => res.blob());
+        // const file = await fetch(fileObj.file).then(res => res.blob());
+        const buffer = await (await fetch(fileObj.file)).arrayBuffer();
         // const filePath = await bot.downloadFile(file.id, '');
         const outputChunks = [];
-        ffmpeg(file)
+        ffmpeg(buffer)
         .outputOptions('-f mp3')
         .on("error", reject)
         .on("end", () => resolve(Buffer.concat(outputChunks)))
@@ -419,8 +420,9 @@ async function getOpenAITranscriptionTextByVideo(bot, file) {
 
 async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
     const fileName = 'audio.mp3';
-    const file = await fetch(fileObj.file).then(res => res.blob());
-    ffmpeg(file)
+    // const file = await fetch(fileObj.file).then(res => res.blob());
+    const buffer = await (await fetch(fileObj.file)).arrayBuffer();
+    ffmpeg(buffer)
         .outputOptions('-f mp3')
         .saveToFile(fileName)
         .on('end', async () => {
