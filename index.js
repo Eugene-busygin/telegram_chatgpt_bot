@@ -389,22 +389,24 @@ async function getOpenAITranscriptionText(file) {
 
 function reduceBitrateByBotFile(bot, fileObj) {
     return new Promise(async (resolve, reject) => {
-        const file = await fetch(fileObj.file.href).then(res => res.blob());
+        // const file = await fetch(fileObj.file.href).then(res => res.blob());
+        console.log('@@1', fileObj.file);
+        let videoPath = await fileManager.downloadFile(fileObj.file.filepath, fileObj.uniqueId, 'Video');
         // const filePath = await bot.downloadFile(file.id, '');
         const outputChunks = [];
-        ffmpeg(file)
-        .outputOptions('-f mp3')
-        .on("error", reject)
-        .on("end", () => resolve(Buffer.concat(outputChunks)))
-        .format("mp3")
-        .pipe(
-            new Writable({
-            write(chunk, encoding, callback) {
-                outputChunks.push(chunk);
-                callback();
-            },
-            })
-        );
+        ffmpeg(videoPath)
+            .outputOptions('-f mp3')
+            .on("error", reject)
+            .on("end", () => resolve(Buffer.concat(outputChunks)))
+            .format("mp3")
+            .pipe(
+                new Writable({
+                    write(chunk, encoding, callback) {
+                        outputChunks.push(chunk);
+                        callback();
+                    },
+                })
+            );
     });
 }
 
@@ -420,17 +422,18 @@ async function getOpenAITranscriptionTextByVideo(bot, file) {
 }
 
 async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
-    // let videoPath = await fileManager.downloadFile(fileObj.file.href, fileObj.uniqueId, 'Video');
+    console.log('@@2', fileObj.file);
+    let videoPath = await fileManager.downloadFile(fileObj.file.filepath, fileObj.uniqueId, 'Video');
 
-    const file = await fetch(fileObj.file.href).then(res => res.blob());
+    // const file = await fetch(fileObj.file.href).then(res => res.blob());
 
     const fileName = 'audio.mp3';
-    ffmpeg(file)
+    ffmpeg(videoPath)
         .outputOptions('-f mp3')
         .saveToFile(fileName)
         .on('end', async () => {
             await bot.sendAudio(chatId, fileName);
-            // fileManager.deleteFile(videoPath)
+            fileManager.deleteFile(videoPath);
         });
     // bot.downloadFile(file.id, '').then((filePath) => {
         
