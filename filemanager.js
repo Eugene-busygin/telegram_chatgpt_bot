@@ -3,8 +3,9 @@ const path = require('path')
 const axios = require('axios')
 
 const downloadFile = async (fileUrl, fileUniqueId, type) => {
-  const fileDir = type === 'Image' ? 'images' : 'videos'
-  const splitFileUrl = fileUrl.split('.')
+  const fileDir = type === 'Image' ? 'images' : 'videos';
+  console.log('@@', fileUrl, typeof fileUrl);
+  const splitFileUrl = fileUrl.toString().split('.')
   const fileFormat = splitFileUrl[splitFileUrl.length - 1]
   const fileName = `${fileUniqueId}.${fileFormat}`
   const filePath = path.resolve(__dirname, `tmp/${fileDir}`, fileName)
