@@ -1,5 +1,6 @@
 require('dotenv').config();
 
+const fetch = require('node-fetch');
 const request = require('request');
 
 const constants = require('./constants');
@@ -600,7 +601,6 @@ bot.command('gpt_type', (ctx) => {
 // }
 
 bot.command('photo', (ctx) => {
-    console.log('@@', ctx);
     const msg = ctx.message;
     const chatId = msg.chat.id;
     const botInstance = ctx.telegram;
@@ -618,7 +618,6 @@ bot.command('photo', (ctx) => {
 })
 
 bot.on('voice', (ctx) => {
-    console.log('@@', ctx);
     const msg = ctx.message;
     const chatId = msg.chat.id;
     const botInstance = ctx.telegram;
@@ -635,7 +634,6 @@ bot.on('voice', (ctx) => {
 });
 
 bot.on('audio', (ctx) => {
-    console.log('@@', ctx);
     const msg = ctx.message;
     const chatId = msg.chat.id;
     const botInstance = ctx.telegram;
@@ -653,7 +651,6 @@ bot.on('audio', (ctx) => {
 });
 
 bot.on('video', (ctx) => {
-    console.log('@@', ctx);
     const msg = ctx.message;
     const chatId = msg.chat.id;
     const botInstance = ctx.telegram;
@@ -673,7 +670,6 @@ bot.on('document', (ctx) => {
     const msg = ctx.message;
     const chatId = msg.chat.id;
     const botInstance = ctx.telegram;
-    console.log('@@', msg, msg.document);
 
     if (msg.document) {
         const fileName = msg.document.file_name;
@@ -709,7 +705,6 @@ bot.on('text', (ctx) => {
     const text = msg.text;
     const botInstance = ctx.telegram;
 
-    console.log('@@', msg, msg.reply_to_message);
     // if (savedChats[chatId]) {
     //     if (savedChats[chatId].gptType) {
     //         answerGpt(chatId, ctx.message.text)
