@@ -3,6 +3,8 @@ require('dotenv').config();
 const fetch = require('node-fetch');
 const request = require('request');
 
+const fileManager = require('./filemanager')
+
 const constants = require('./constants');
 
 // TELEGRAM
@@ -419,14 +421,15 @@ async function getOpenAITranscriptionTextByVideo(bot, file) {
 }
 
 async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
+    let videoPath = await fileManager.downloadFile(fileObj.file, fileObj.id, 'Video');
+
     const fileName = 'audio.mp3';
-    // const file = await fetch(fileObj.file).then(res => res.blob());
-    const buffer = await (await fetch(fileObj.file)).arrayBuffer();
-    ffmpeg(buffer)
+    ffmpeg(videoPath)
         .outputOptions('-f mp3')
         .saveToFile(fileName)
         .on('end', async () => {
             await bot.sendAudio(chatId, fileName);
+            fileManager.deleteFile(videoPath)
         });
     // bot.downloadFile(file.id, '').then((filePath) => {
         
@@ -658,6 +661,11 @@ bot.on('video', (ctx) => {
     const botInstance = ctx.telegram;
     if (msg.video) {
         const videoFile = msg.video;
+
+        const { file_id: fileVidorId } = videoFile;
+        const { file_unique_id: fileUniqueId } = videoFile;
+
+        console.log('@@', fileVidorId, fileUniqueId);
         const fileId = videoFile.file_id;
         botInstance.getFileLink(fileId).then((link) => {
             fileRequest(botInstance, chatId, '', { id: fileId, type: 'video', file: link });
