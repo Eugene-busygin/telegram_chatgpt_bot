@@ -67,7 +67,7 @@ const pingBot = async () => {
         () => request(
             process.env.URL,
             () => {
-                console.log(`Ping on port ${pprocess.env.PORT}`);
+                console.log(`Ping on port ${process.env.PORT}`);
             }
         ), 800000
     );
@@ -384,11 +384,12 @@ async function getOpenAITranscriptionText(file) {
     return result.data.text;
 }
 
-function reduceBitrateByBotFile(bot, file) {
+function reduceBitrateByBotFile(bot, fileObj) {
     return new Promise(async (resolve, reject) => {
-        const filePath = await bot.downloadFile(file.id, '');
+        const file = await fetch(fileObj.file).then(res => res.blob());
+        // const filePath = await bot.downloadFile(file.id, '');
         const outputChunks = [];
-        ffmpeg(filePath)
+        ffmpeg(file)
         .outputOptions('-f mp3')
         .on("error", reject)
         .on("end", () => resolve(Buffer.concat(outputChunks)))
@@ -415,16 +416,18 @@ async function getOpenAITranscriptionTextByVideo(bot, file) {
     return result.data.text;
 }
 
-async function createAudioByVideoAndSendToChat(bot, chatId, file) {
+async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
     const fileName = 'audio.mp3';
-    bot.downloadFile(file.id, '').then((filePath) => {
-        ffmpeg(filePath)
+    const file = await fetch(fileObj.file).then(res => res.blob());
+    ffmpeg(file)
         .outputOptions('-f mp3')
         .saveToFile(fileName)
         .on('end', async () => {
             await bot.sendAudio(chatId, fileName);
         });
-    });
+    // bot.downloadFile(file.id, '').then((filePath) => {
+        
+    // });
 }
 
 const getStablediffusionImage = async (bot, chatId, text, photo = null) => {
