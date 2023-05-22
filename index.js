@@ -325,7 +325,29 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 return bot.sendMessage(chatId, `Некорректно задан вопрос или превышена длина`);
             }
         } else {
-            return bot.sendMessage(chatId, answer);
+            switch(typeAnswer) {
+                case "text":
+                    if (type === constants.GPT_TYPE.dialog.type) {
+                        return bot.sendMessage(chatId, answer, againOptions);
+                    } else {
+                        if (answer.length > 4096) {
+                            for (let x = 0; x < answer.length; x += 4096) {
+                                bot.sendMessage(chatId, answer.slice(x, x + 4096));
+                            }
+                            return;
+                        } else {
+                            return bot.sendMessage(chatId, answer);
+                        }
+                    }
+                case "image":
+                    const newMoreOptions = moreOptions;
+                    newMoreOptions.caption = text;
+                    return bot.sendPhoto(chatId, answer, newMoreOptions);
+                case "audio":
+                    return bot.sendAudio(chatId, answer);
+                default:
+                    return bot.sendMessage(chatId, answer);
+            };
         }
     } catch (e) {
         savedChats[chatId].isBlockedGptRequest = false;
