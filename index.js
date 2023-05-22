@@ -396,7 +396,7 @@ function reduceBitrateByBotFile(bot, fileObj) {
         const file = 'output.mp4';
         const response = axios({
             method: 'get',
-            url: fileObj.file.href,
+            url: fileObj.file,
             responseType: 'stream',
         });
         const outStream = await new Promise((resolve) => {
