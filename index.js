@@ -262,12 +262,11 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 }
                 break;
             case constants.GPT_TYPE.video_audio.type:
-                typeAnswer = 'text';
+                typeAnswer = 'image';
                 savedChats[chatId].isBlockedGptRequest = false;
                 if (fileObj.type === 'video') {
                     savedChats[chatId].isBlockedGptRequest = false;
-                    createAudioByVideoAndSendToChat(bot, chatId, fileObj);
-                    return;
+                    answer = await createAudioByVideoAndSendToChat(fileObj);
                 }
                 break;
             case constants.GPT_TYPE.image.type:
@@ -317,6 +316,8 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                         const newMoreOptions = moreOptions;
                         newMoreOptions.caption = text;
                         return bot.sendPhoto(chatId, answer, newMoreOptions);
+                    case "audio":
+                        return bot.sendAudio(chatId, { source: answer });
                     default:
                         return bot.sendMessage(chatId, answer);
                 }
@@ -432,11 +433,11 @@ async function getOpenAITranscriptionTextByVideo(fileObj) {
     return result.data.text;
 }
 
-async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
+async function createAudioByVideoAndSendToChat(fileObj) {
     const resizedBuffer = await reduceBitrateByBotFile(fileObj);
     const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
 
-    bot.sendAudio(chatId, { source: fs.createReadStream(resizedStream) });
+    return fs.createReadStream(resizedStream);
     // bot.downloadFile(file.id, '').then((filePath) => {
         
     // });
