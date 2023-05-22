@@ -267,6 +267,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 if (fileObj.type === 'video') {
                     savedChats[chatId].isBlockedGptRequest = false;
                     answer = await createAudioByVideoAndSendToChat(fileObj);
+                    return;
                 }
                 break;
             case constants.GPT_TYPE.image.type:
@@ -434,10 +435,28 @@ async function getOpenAITranscriptionTextByVideo(fileObj) {
 }
 
 async function createAudioByVideoAndSendToChat(fileObj) {
-    const resizedBuffer = await reduceBitrateByBotFile(fileObj);
-    const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
 
-    return fs.createReadStream(resizedStream);
+    const response = await axios.get(fileObj.file, { responseType: 'stream' })
+    const writer = fs.createWriteStream('video.mp4')
+    response.data.pipe(writer)
+    const audioPath = 'audio.ogg'
+    ffmpeg('video.mp4')
+      .toFormat('ogg')
+      .on('end', function() {
+        console.log('File has been converted successfully')
+        // Отправляем аудиофайл пользователю
+        ctx.replyWithAudio({ source: audioPath })
+      })
+      .on('error', function(err) {
+        console.log('An error occurred: ' + err.message)
+        ctx.reply('Произошла ошибка во время конвертации файла')
+      })
+      .save(audioPath)
+
+    // const resizedBuffer = await reduceBitrateByBotFile(fileObj);
+    // const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
+
+    return null;
     // bot.downloadFile(file.id, '').then((filePath) => {
         
     // });
