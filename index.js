@@ -266,7 +266,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 savedChats[chatId].isBlockedGptRequest = false;
                 if (fileObj.type === 'video') {
                     savedChats[chatId].isBlockedGptRequest = false;
-                    answer = await createAudioByVideoAndSendToChat(fileObj);
+                    answer = await createAudioByVideoAndSendToChat(bot, fileObj);
                     return;
                 }
                 break;
@@ -434,22 +434,39 @@ async function getOpenAITranscriptionTextByVideo(fileObj) {
     return result.data.text;
 }
 
-async function createAudioByVideoAndSendToChat(fileObj) {
+async function createAudioByVideoAndSendToChat(bot, fileObj) {
 
     const response = await axios.get(fileObj.file, { responseType: 'stream' })
-    const writer = fs.createWriteStream('video.mp4')
-    response.data.pipe(writer)
+    // const writer = fs.createWriteStream('video.mp4')
+    // response.data.pipe(writer)
+
+    const outStream = await new Promise((resolve) => {
+        const writer = fs.createWriteStream('video.mp4')
+        response.data.pipe(writer);
+        stream.on('finish', () => {
+            resolve(file)
+        })
+    });
+
     const audioPath = 'audio.ogg'
-    ffmpeg('video.mp4')
+    ffmpeg(outStream)
       .toFormat('ogg')
-      .on('end', function() {
+      .on('end', async function() {
         console.log('File has been converted successfully')
         // Отправляем аудиофайл пользователю
-        ctx.replyWithAudio({ source: audioPath })
+        await bot.replyWithAudio({ source: audioPath })
+        fs.unlink(audioPath, (err) => {
+            if (err) {
+              console.error(err)
+              return
+            }
+            console.log('File has been deleted successfully')
+          })
+
       })
       .on('error', function(err) {
         console.log('An error occurred: ' + err.message)
-        ctx.reply('Произошла ошибка во время конвертации файла')
+        // ctx.reply('Произошла ошибка во время конвертации файла')
       })
       .save(audioPath)
 
