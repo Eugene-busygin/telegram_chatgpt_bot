@@ -436,42 +436,51 @@ async function getOpenAITranscriptionTextByVideo(fileObj) {
 
 async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
 
-    const response = await axios.get(fileObj.file, { responseType: 'stream' })
-    // const writer = fs.createWriteStream('video.mp4')
-    // response.data.pipe(writer)
+    const resizedBuffer = await reduceBitrateByBotFile(fileObj);
 
-    const outStream = await new Promise((resolve) => {
-        const writer = fs.createWriteStream('video.mp4')
-        response.data.pipe(writer);
-        writer.on('finish', () => {
-            resolve('video.mp4')
-        })
-    });
 
-    const audioPath = 'audio.ogg'
-    ffmpeg(outStream)
-      .toFormat('ogg')
-      .on('end', async function() {
-        console.log('File has been converted successfully')
-        // Отправляем аудиофайл пользователю
-        await bot.sendAudio(chatId, { source: audioPath });
-        fs.unlink(audioPath, (err) => {
-            if (err) {
-              console.error(err)
-              return
-            }
-            console.log('File has been deleted successfully')
-          })
+    const params = {
+        filename: 'output.mp3'
+    }
 
-      })
-      .on('error', function(err) {
-        console.log('An error occurred: ' + err.message)
-        // ctx.reply('Произошла ошибка во время конвертации файла')
-      })
-      .save(audioPath)
+    await bot.sendAudio(chatId, resizedBuffer, params);
+    
+    const audioFile = input.file(resizedBuffer, 'audio.mp3');
 
-    // const resizedBuffer = await reduceBitrateByBotFile(fileObj);
-    // const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
+    await bot.sendAudio(chatId, audioFile);
+
+    // const response = await axios.get(fileObj.file, { responseType: 'stream' })
+    // // const writer = fs.createWriteStream('video.mp4')
+    // // response.data.pipe(writer)
+
+    // const outStream = await new Promise((resolve) => {
+    //     const file = 'output.mp4';
+    //     const writer = fs.createWriteStream(file);
+    //     response.data.pipe(writer);
+    //     writer.on('finish', () => {
+    //         resolve(file);
+    //     })
+    // });
+
+    // const audioPath = 'audio.ogg';
+    // ffmpeg(outStream)
+    //   .toFormat('ogg')
+    //   .on('end', async function() {
+    //     await bot.sendAudio(chatId, { source: audioPath });
+    //     fs.unlink(audioPath, (err) => {
+    //         if (err) {
+    //           console.error(err)
+    //           return
+    //         }
+    //       })
+
+    //   })
+    //   .on('error', function(err) {
+    //     return bot.sendMessage(chatId, 'Произошла ошибка во время конвертации файла');
+    //   })
+    //   .save(audioPath)
+
+    
 
     return null;
     // bot.downloadFile(file.id, '').then((filePath) => {
