@@ -443,11 +443,11 @@ async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
         filename: 'output.mp3'
     }
 
-    await bot.sendAudio(chatId, resizedBuffer, params);
+    // await bot.sendAudio(chatId, resizedBuffer, params);
     
     const audioFile = input.file(resizedBuffer, 'audio.mp3');
 
-    await bot.sendAudio(chatId, audioFile);
+    await bot.sendAudio(chatId, audioFile, params);
 
     // const response = await axios.get(fileObj.file, { responseType: 'stream' })
     // // const writer = fs.createWriteStream('video.mp4')
