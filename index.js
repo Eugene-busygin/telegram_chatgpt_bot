@@ -266,8 +266,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 savedChats[chatId].isBlockedGptRequest = false;
                 if (fileObj.type === 'video') {
                     savedChats[chatId].isBlockedGptRequest = false;
-                    answer = await createAudioByVideoAndSendToChat(bot, chatId, fileObj);
-                    return;
+                    answer = await createAudioByVideoAndSendToChat(fileObj);
                 }
                 break;
             case constants.GPT_TYPE.image.type:
@@ -318,7 +317,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                         newMoreOptions.caption = text;
                         return bot.sendPhoto(chatId, answer, newMoreOptions);
                     case "audio":
-                        return bot.sendAudio(chatId, { source: answer });
+                        return bot.sendAudio(chatId, answer);
                     default:
                         return bot.sendMessage(chatId, answer);
                 }
@@ -434,46 +433,10 @@ async function getOpenAITranscriptionTextByVideo(fileObj) {
     return result.data.text;
 }
 
-async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
-
+async function createAudioByVideoAndSendToChat(fileObj) {
     const resizedBuffer = await reduceBitrateByBotFile(fileObj);
 
-    await bot.sendAudio(chatId, { source: resizedBuffer, filename: 'output.mp3' });
-
-    // const response = await axios.get(fileObj.file, { responseType: 'stream' })
-    // // const writer = fs.createWriteStream('video.mp4')
-    // // response.data.pipe(writer)
-
-    // const outStream = await new Promise((resolve) => {
-    //     const file = 'output.mp4';
-    //     const writer = fs.createWriteStream(file);
-    //     response.data.pipe(writer);
-    //     writer.on('finish', () => {
-    //         resolve(file);
-    //     })
-    // });
-
-    // const audioPath = 'audio.ogg';
-    // ffmpeg(outStream)
-    //   .toFormat('ogg')
-    //   .on('end', async function() {
-    //     await bot.sendAudio(chatId, { source: audioPath });
-    //     fs.unlink(audioPath, (err) => {
-    //         if (err) {
-    //           console.error(err)
-    //           return
-    //         }
-    //       })
-
-    //   })
-    //   .on('error', function(err) {
-    //     return bot.sendMessage(chatId, 'Произошла ошибка во время конвертации файла');
-    //   })
-    //   .save(audioPath)
-
-    
-
-    return null;
+    return { source: resizedBuffer, filename: 'output.mp3' };
     // bot.downloadFile(file.id, '').then((filePath) => {
         
     // });
