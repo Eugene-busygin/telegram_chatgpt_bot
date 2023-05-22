@@ -266,7 +266,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 savedChats[chatId].isBlockedGptRequest = false;
                 if (fileObj.type === 'video') {
                     savedChats[chatId].isBlockedGptRequest = false;
-                    answer = await createAudioByVideoAndSendToChat(bot, fileObj);
+                    answer = await createAudioByVideoAndSendToChat(bot, chatId, fileObj);
                     return;
                 }
                 break;
@@ -434,7 +434,7 @@ async function getOpenAITranscriptionTextByVideo(fileObj) {
     return result.data.text;
 }
 
-async function createAudioByVideoAndSendToChat(bot, fileObj) {
+async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
 
     const response = await axios.get(fileObj.file, { responseType: 'stream' })
     // const writer = fs.createWriteStream('video.mp4')
@@ -454,7 +454,7 @@ async function createAudioByVideoAndSendToChat(bot, fileObj) {
       .on('end', async function() {
         console.log('File has been converted successfully')
         // Отправляем аудиофайл пользователю
-        await bot.replyWithAudio({ source: audioPath })
+        await bot.sendAudio(chatId, { source: audioPath });
         fs.unlink(audioPath, (err) => {
             if (err) {
               console.error(err)
