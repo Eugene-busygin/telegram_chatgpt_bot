@@ -436,8 +436,9 @@ async function getOpenAITranscriptionTextByVideo(fileObj) {
 
 async function createAudioByVideoAndSendToChat(fileObj) {
     const resizedBuffer = await reduceBitrateByBotFile(fileObj);
+    const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
 
-    return bot.sendAudio(chatId, { source: resizedBuffer, filename: 'output.mp3' });
+    return bot.sendAudio(chatId, resizedStream);
 
     return ;
     // bot.downloadFile(file.id, '').then((filePath) => {
