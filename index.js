@@ -444,7 +444,7 @@ async function createAudioByVideoAndSendToChat(bot, fileObj) {
         const writer = fs.createWriteStream('video.mp4')
         response.data.pipe(writer);
         writer.on('finish', () => {
-            resolve(file)
+            resolve('video.mp4')
         })
     });
 
