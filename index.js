@@ -426,6 +426,8 @@ async function getOpenAITranscriptionTextByVideo(fileObj) {
     const resizedBuffer = await reduceBitrateByBotFile(fileObj);
     const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
 
+    console.log('@@1', resizedStream)
+
     const result = await openai.createTranscription(
         resizedStream, constants.GPT_MODELS.audio
     );
@@ -437,7 +439,9 @@ async function createAudioByVideoAndSendToChat(fileObj) {
     const resizedBuffer = await reduceBitrateByBotFile(fileObj);
     const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
 
-    return fs.createReadStream(resizedStream);
+    console.log('@@2', resizedStream)
+
+    return resizedStream;
     // bot.downloadFile(file.id, '').then((filePath) => {
         
     // });
