@@ -317,7 +317,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                         newMoreOptions.caption = text;
                         return bot.sendPhoto(chatId, answer, newMoreOptions);
                     case "audio":
-                        return bot.sendAudio(chatId, { source: answer });
+                        return bot.sendAudio(chatId, answer);
                     default:
                         return bot.sendMessage(chatId, answer);
                 }
