@@ -439,15 +439,23 @@ async function getOpenAITranscriptionTextByVideo(bot, file) {
 async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
     console.log('@@2', fileObj.file);
     // let videoPath = await fileManager.downloadFile(fileObj.file.pathname, fileObj.uniqueId, 'Video');
-    const file = await axios({
+    const fileName = 'audio.mp3';
+    const response = axios({
         method: 'get',
         url: fileObj.file.href,
         responseType: 'stream',
     });
+    const outStream = await new Promise((resolve) => {
+        const stream = fs.createWriteStream(fileName);
+        response.data.pipe(stream);
+        stream.on('finish', () => {
+            resolve(fileName)
+        })
+    });
     // const file = await fetch(fileObj.file.href).then(res => res.blob());
 
-    const fileName = 'audio.mp3';
-    ffmpeg(file.data)
+    
+    ffmpeg(outStream)
         .outputOptions('-f mp3')
         .saveToFile(fileName)
         .on('end', async () => {
