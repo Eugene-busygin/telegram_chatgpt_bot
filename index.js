@@ -6,8 +6,6 @@ const request = require('request');
 
 const fs = require('fs');
 
-const fileManager = require('./filemanager')
-
 const constants = require('./constants');
 
 // TELEGRAM
@@ -215,11 +213,11 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 if (fileObj) {
                     if (fileObj.type === 'audio') {
                         savedChats[chatId].isBlockedGptRequest = false;
-                        text = text + ' ' + await getOpenAITranscriptionText(fileObj.file);
+                        text = text + ' ' + await getOpenAITranscriptionText(fileObj);
                     }
                     if (fileObj.type === 'video') {
                         savedChats[chatId].isBlockedGptRequest = false;
-                        text = text + ' ' + await getOpenAITranscriptionTextByVideo(bot, fileObj);
+                        text = text + ' ' + await getOpenAITranscriptionTextByVideo(fileObj);
                     }
                 }
                 if (savedChats[chatId].gptHistoryToken + text.length > constants.GPT_TYPE.maxToken) {
@@ -252,7 +250,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 savedChats[chatId].isBlockedGptRequest = false;
                 if (fileObj.type === 'audio') {
                     savedChats[chatId].isBlockedGptRequest = false;
-                    answer = await getOpenAITranscriptionText(fileObj.file);
+                    answer = await getOpenAITranscriptionText(fileObj);
                 }
                 break;
             case constants.GPT_TYPE.video.type:
@@ -260,7 +258,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 savedChats[chatId].isBlockedGptRequest = false;
                 if (fileObj.type === 'video') {
                     savedChats[chatId].isBlockedGptRequest = false;
-                    answer = await getOpenAITranscriptionTextByVideo(bot, fileObj);
+                    answer = await getOpenAITranscriptionTextByVideo(fileObj);
                 }
                 break;
             case constants.GPT_TYPE.video_audio.type:
@@ -374,8 +372,8 @@ function arrayBufferToStream(buffer) {
     return readable;
 }
 
-async function getOpenAITranscriptionText(file) {
-    const response = await axios.get(file, {
+async function getOpenAITranscriptionText(fileObj) {
+    const response = await axios.get(fileObj.file, {
         responseType: "arraybuffer",
     });
     const inputStream = arrayBufferToStream(response.data);
@@ -390,9 +388,8 @@ async function getOpenAITranscriptionText(file) {
     return result.data.text;
 }
 
-function reduceBitrateByBotFile(bot, fileObj) {
+function reduceBitrateByBotFile(fileObj) {
     return new Promise(async (resolve, reject) => {
-        // const file = await fetch(fileObj.file.href).then(res => res.blob());
         const file = 'output.mp4';
         const response = await axios({
             method: 'get',
@@ -406,7 +403,6 @@ function reduceBitrateByBotFile(bot, fileObj) {
                 resolve(file)
             })
         });
-        // let videoPath = await fileManager.downloadFile(fileObj.file.pathname, fileObj.uniqueId, 'Video');
         // const filePath = await bot.downloadFile(file.id, '');
         const outputChunks = [];
         ffmpeg(outStream)
@@ -425,8 +421,8 @@ function reduceBitrateByBotFile(bot, fileObj) {
     });
 }
 
-async function getOpenAITranscriptionTextByVideo(bot, file) {
-    const resizedBuffer = await reduceBitrateByBotFile(bot, file);
+async function getOpenAITranscriptionTextByVideo(fileObj) {
+    const resizedBuffer = await reduceBitrateByBotFile(fileObj);
     const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
 
     const result = await openai.createTranscription(
@@ -437,28 +433,10 @@ async function getOpenAITranscriptionTextByVideo(bot, file) {
 }
 
 async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
-    console.log('@@2', fileObj.file);
-    // let videoPath = await fileManager.downloadFile(fileObj.file.pathname, fileObj.uniqueId, 'Video');
-    const file = 'output.mp4';
-    const response = await axios({
-        method: 'get',
-        url: fileObj.file.href,
-        responseType: 'stream',
-    });
-    const outStream = await new Promise((resolve) => {
-        const stream = fs.createWriteStream(file);
-        response.data.pipe(stream);
-        stream.on('finish', () => {
-            resolve(file)
-        })
-    });
-    ffmpeg(outStream)
-        .outputOptions('-f mp3')
-        .saveToFile(file)
-        .on('end', async () => {
-            await bot.sendAudio(chatId, file);
-            // fileManager.deleteFile(videoPath);
-        });
+    const resizedBuffer = await reduceBitrateByBotFile(fileObj);
+    const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
+
+    bot.sendAudio(chatId, { source: fs.createReadStream(resizedStream) });
     // bot.downloadFile(file.id, '').then((filePath) => {
         
     // });
