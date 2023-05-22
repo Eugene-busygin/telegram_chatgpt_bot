@@ -430,27 +430,21 @@ async function getOpenAITranscriptionTextByVideo(bot, file) {
 async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
     console.log('@@2', fileObj.file);
     // let videoPath = await fileManager.downloadFile(fileObj.file.pathname, fileObj.uniqueId, 'Video');
-    // const file = await axios({
-    //     method: 'get',
-    //     url: fileObj.file.href,
-    //     responseType: 'stream',
-    // });
-    const audioStream = ffmpeg(fileObj.file.href)
-      .outputFormat('mp3')
-      .noVideo()
-      .pipe();
+    const file = await axios({
+        method: 'get',
+        url: fileObj.file.href,
+        responseType: 'stream',
+    });
     // const file = await fetch(fileObj.file.href).then(res => res.blob());
 
-    await bot.sendAudio(chatId, audioStream);
-
-    // const fileName = 'audio.mp3';
-    // ffmpeg(file.data)
-    //     .outputOptions('-f mp3')
-    //     .saveToFile(fileName)
-    //     .on('end', async () => {
-    //         await bot.sendAudio(chatId, fileName);
-    //         // fileManager.deleteFile(videoPath);
-    //     });
+    const fileName = 'audio.mp3';
+    ffmpeg(file.data)
+        .outputOptions('-f mp3')
+        .saveToFile(fileName)
+        .on('end', async () => {
+            await bot.sendAudio(chatId, fileName);
+            // fileManager.deleteFile(videoPath);
+        });
     // bot.downloadFile(file.id, '').then((filePath) => {
         
     // });
