@@ -440,7 +440,7 @@ async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
     console.log('@@2', fileObj.file);
     // let videoPath = await fileManager.downloadFile(fileObj.file.pathname, fileObj.uniqueId, 'Video');
     const fileName = 'audio.mp3';
-    const response = axios({
+    const response = await axios({
         method: 'get',
         url: fileObj.file.href,
         responseType: 'stream',
