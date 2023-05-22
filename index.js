@@ -435,7 +435,7 @@ async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
     //     url: fileObj.file.href,
     //     responseType: 'stream',
     // });
-    const audioStream = ffmpeg(fileObj.file)
+    const audioStream = ffmpeg(fileObj.file.href)
       .outputFormat('mp3')
       .noVideo()
       .pipe();
