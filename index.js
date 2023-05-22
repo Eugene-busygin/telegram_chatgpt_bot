@@ -267,7 +267,6 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 if (fileObj.type === 'video') {
                     savedChats[chatId].isBlockedGptRequest = false;
                     answer = await createAudioByVideoAndSendToChat(fileObj);
-                    return;
                 }
                 break;
             case constants.GPT_TYPE.image.type:
@@ -438,9 +437,7 @@ async function createAudioByVideoAndSendToChat(fileObj) {
     const resizedBuffer = await reduceBitrateByBotFile(fileObj);
     const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
 
-    return bot.sendAudio(chatId, resizedStream);
-
-    return ;
+    return resizedStream;
     // bot.downloadFile(file.id, '').then((filePath) => {
         
     // });
