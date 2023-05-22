@@ -262,7 +262,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 }
                 break;
             case constants.GPT_TYPE.video_audio.type:
-                typeAnswer = 'image';
+                typeAnswer = 'audio';
                 savedChats[chatId].isBlockedGptRequest = false;
                 if (fileObj.type === 'video') {
                     savedChats[chatId].isBlockedGptRequest = false;
