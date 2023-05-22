@@ -443,7 +443,7 @@ async function createAudioByVideoAndSendToChat(bot, fileObj) {
     const outStream = await new Promise((resolve) => {
         const writer = fs.createWriteStream('video.mp4')
         response.data.pipe(writer);
-        stream.on('finish', () => {
+        writer.on('finish', () => {
             resolve(file)
         })
     });
