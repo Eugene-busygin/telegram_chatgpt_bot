@@ -445,23 +445,17 @@ async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
         url: fileObj.file.href,
         responseType: 'stream',
     });
-    const outStream = await new Promise((resolve) => {
-        const stream = fs.createWriteStream(fileName);
-        response.data.pipe(stream);
-        stream.on('finish', () => {
-            resolve(fileName)
-        })
+    const stream = fs.createWriteStream(fileName);
+    response.data.pipe(stream);
+    stream.on('finish', () => {
+        ffmpeg()
+            .input(fileName)
+            .outputOptions('-f mp3')
+            .saveToFile(`converted_${fileName}`)
+            .on('end', async () => {
+                await bot.sendAudio(chatId, `converted_${fileName}`);
+            });
     });
-    // const file = await fetch(fileObj.file.href).then(res => res.blob());
-
-    
-    ffmpeg(outStream)
-        .outputOptions('-f mp3')
-        .saveToFile(fileName)
-        .on('end', async () => {
-            await bot.sendAudio(chatId, fileName);
-            // fileManager.deleteFile(videoPath);
-        });
     // bot.downloadFile(file.id, '').then((filePath) => {
         
     // });
