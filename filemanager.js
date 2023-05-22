@@ -1,6 +1,6 @@
-const fs = require('fs')
-const path = require('path')
-const axios = require('axios')
+const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
 
 const downloadFile = async (fileUrl, fileUniqueId, type) => {
   const fileDir = type === 'Image' ? 'images' : 'videos';

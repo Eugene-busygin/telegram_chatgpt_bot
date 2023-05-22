@@ -4,6 +4,8 @@ const axios = require('axios');
 const fetch = require('node-fetch');
 const request = require('request');
 
+const fs = require('fs');
+
 const fileManager = require('./filemanager')
 
 const constants = require('./constants');
@@ -391,16 +393,23 @@ async function getOpenAITranscriptionText(file) {
 function reduceBitrateByBotFile(bot, fileObj) {
     return new Promise(async (resolve, reject) => {
         // const file = await fetch(fileObj.file.href).then(res => res.blob());
-        const file = await axios({
+        const file = 'output.mp4';
+        const response = axios({
             method: 'get',
             url: fileObj.file.href,
             responseType: 'stream',
         });
-        console.log('@@1', fileObj.file);
+        const outStream = await new Promise((resolve) => {
+            const stream = fs.createWriteStream(file);
+            response.data.pipe(stream);
+            stream.on('finish', () => {
+                resolve(file)
+            })
+        });
         // let videoPath = await fileManager.downloadFile(fileObj.file.pathname, fileObj.uniqueId, 'Video');
         // const filePath = await bot.downloadFile(file.id, '');
         const outputChunks = [];
-        ffmpeg(file.data)
+        ffmpeg(outStream)
             .outputOptions('-f mp3')
             .on("error", reject)
             .on("end", () => resolve(Buffer.concat(outputChunks)))
