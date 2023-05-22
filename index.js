@@ -438,16 +438,7 @@ async function createAudioByVideoAndSendToChat(bot, chatId, fileObj) {
 
     const resizedBuffer = await reduceBitrateByBotFile(fileObj);
 
-
-    const params = {
-        filename: 'output.mp3'
-    }
-
-    // await bot.sendAudio(chatId, resizedBuffer, params);
-    
-    const audioFile = input.file(resizedBuffer, 'audio.mp3');
-
-    await bot.sendAudio(chatId, audioFile, params);
+    await bot.sendAudio(chatId, { source: resizedBuffer, filename: 'output.mp3' });
 
     // const response = await axios.get(fileObj.file, { responseType: 'stream' })
     // // const writer = fs.createWriteStream('video.mp4')
