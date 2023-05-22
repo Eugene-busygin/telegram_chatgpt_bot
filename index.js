@@ -317,7 +317,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                         newMoreOptions.caption = text;
                         return bot.sendPhoto(chatId, answer, newMoreOptions);
                     case "audio":
-                        return bot.sendAudio(chatId, answer);
+                        return bot.sendAudio(chatId, { source: answer });
                     default:
                         return bot.sendMessage(chatId, answer);
                 }
@@ -426,8 +426,6 @@ async function getOpenAITranscriptionTextByVideo(fileObj) {
     const resizedBuffer = await reduceBitrateByBotFile(fileObj);
     const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
 
-    console.log('@@1', resizedStream)
-
     const result = await openai.createTranscription(
         resizedStream, constants.GPT_MODELS.audio
     );
@@ -439,9 +437,7 @@ async function createAudioByVideoAndSendToChat(fileObj) {
     const resizedBuffer = await reduceBitrateByBotFile(fileObj);
     const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
 
-    console.log('@@2', resizedStream)
-
-    return resizedStream;
+    return fs.createReadStream(resizedStream);
     // bot.downloadFile(file.id, '').then((filePath) => {
         
     // });
