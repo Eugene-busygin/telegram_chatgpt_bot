@@ -858,7 +858,7 @@ bot.on('callback_query', async (ctx) => {
                 const voice = "Peter"; // голос озвучивания
                 const voiceFormat = '48khz_16bit_stereo';
                 const voiceCodec = 'OGG';
-                const url = `https://api.voicerss.org/?key=${process.env.VOICERSS_TOKEN}&hl=${voiceLang}&c=${voiceCodec}&v=${voice}&f=${voiceFormat}&src=${encodeURIComponent(msg.text)}`;
+                const url = ``;
                 axios.get(url, {
                     responseType: "blob"
                 }).then(response => {
