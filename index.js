@@ -853,17 +853,30 @@ bot.on('callback_query', async (ctx) => {
                     botInstance.editMessageReplyMarkup(chatId, messageId, null, againOptions.reply_markup);
                     // answerGpt(botInstance, chatId, text);
                 }
-                if (msg.text.length > 100) {
-                    for (let i = 0; i < msg.text.length; i += 100) {
-                        const textChunk = msg.text.substring(i, i + 100);
-                        if (i + 100 >= msg.text.length) {
-                            await textToSpeech(botInstance, chatId, msg.text.substring(i));
+                let all = msg.text.length;
+                if (all.length > 100) {
+                    // for (let i = 0; i < msg.text.length; i += 100) {
+                    //     const textChunk = msg.text.substring(i, i + 100);
+                    //     if (i + 100 >= msg.text.length) {
+                    //         await textToSpeech(botInstance, chatId, msg.text.substring(i));
+                    //     } else {
+                    //         await textToSpeech(botInstance, chatId, textChunk);
+                    //     }
+                    // }
+
+                    while(all.length > 0) {
+                        if (all.length > 100) {
+                            let substr = all.substring(0, 100);
+                            console.log(substr);
+                            all = all.substring(100);
                         } else {
-                            await textToSpeech(botInstance, chatId, textChunk);
+                            console.log(all);
+                            all = '';
                         }
                     }
+
                 } else {
-                    textToSpeech(botInstance, chatId, msg.text);
+                    textToSpeech(botInstance, chatId, all);
                 }
                 break;
 
