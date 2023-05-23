@@ -850,7 +850,7 @@ bot.on('callback_query', async (ctx) => {
                 break;
             case '/text_to_speech':
                 if (msg.text && savedChats[chatId].gptType.type === constants.GPT_TYPE.dialog.type) {
-                    botInstance.editMessageReplyMarkup(chatId, messageId, null, againOptions);
+                    botInstance.editMessageReplyMarkup(chatId, messageId, null, againOptions.reply_markup);
                     // answerGpt(botInstance, chatId, text);
                 }
                 const voiceLang = "ru-RU"; // язык озвучивания
@@ -865,20 +865,13 @@ bot.on('callback_query', async (ctx) => {
                 const inputStream = arrayBufferToStream(response.data);
                 const resizedBuffer = await reduceBitrate(inputStream);
                 const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
-                return botInstance.sendAudio(chatId, { source: resizedStream, filename: 'audio.mp3' });
-                // axios.get(url, {
-                //     responseType: "blob"
-                // }).then(response => {
 
-                //     return botInstance.sendAudio(chatId, { source: response.data, filename: 'audio.ogg' });
-                // }).catch(error => {
-                //     console.log(error);
-                // });
+                return botInstance.sendAudio(chatId, { source: resizedStream, filename: 'audio.mp3' });
                 break;
 
             case '/more_gpt_image':
                 if (msg.text && savedChats[chatId].gptType.type === constants.GPT_TYPE.image.type) {
-                    botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions);
+                    botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions.reply_markup);
                     answerGpt(botInstance, chatId, msg.text);
                 }
                 break;
@@ -892,13 +885,13 @@ bot.on('callback_query', async (ctx) => {
                 return botInstance.sendMessage(chatId, 'Скоро появится');
 
                 if (msg.text && savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
-                    botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions);
+                    botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions.reply_markup);
                     getStablediffusionImage(botInstance, chatId, t);
                 }
                 break;
 
             case '/reload_gpt_dialog':
-                botInstance.editMessageReplyMarkup(chatId, messageId, null, speechOptions);
+                botInstance.editMessageReplyMarkup(chatId, messageId, null, speechOptions.reply_markup);
                 reloadGptHistory(botInstance, chatId, true);
                 break;
 
