@@ -43,6 +43,8 @@ const {
     choiceTypeGptVideoAudioOptions,
     choiceTypeStablediffusionImageOptions,
     againOptions,
+    speechOptions,
+    speechAndAgainOptions,
     moreOptions,
     emptyOptions,
     moreStablediffusionOptions,
@@ -205,7 +207,6 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
     let answer = "Ничего не понятно..";
     let result = null;
     let typeAnswer = null;
-    savedChats[chatId].savedLastMessage = null;
 
     try {
         switch(type) {
@@ -272,7 +273,6 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 break;
             case constants.GPT_TYPE.image.type:
                 typeAnswer = 'image';
-                savedChats[chatId].savedLastMessage = text;
                 result = await openai.createImage({
                     n: 1,
                     prompt: text,
@@ -302,7 +302,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 switch(typeAnswer) {
                     case "text":
                         if (type === constants.GPT_TYPE.dialog.type) {
-                            return bot.sendMessage(chatId, answer, againOptions);
+                            return bot.sendMessage(chatId, answer, speechAndAgainOptions);
                         } else {
                             if (answer.length > 4096) {
                                 for (let x = 0; x < answer.length; x += 4096) {
@@ -520,7 +520,6 @@ bot.start( async (ctx) => {
             gptHistory: [],
             gptHistoryToken: 0,
             isAuth: process.env.ADMIN_ID !== chatId.toString() ? false : true,
-            savedLastMessage: null,
             lastUpdateGptRequestTime: 0,
             isBlockedGptRequest: false,
         };
@@ -851,14 +850,16 @@ bot.on('callback_query', async (ctx) => {
                 saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.video_audio);
                 break;
             case '/text_to_speech':
-                console.log('@@', msg, msg.chat, ctx.update.callback_query);
-                // const text = savedChats[chatId].savedLastMessage;
-                if (text && savedChats[chatId].gptType.type === constants.GPT_TYPE.dialog.type) {
-                    botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions);
+                console.log('@@', msg.text);
+                if (msg.text && savedChats[chatId].gptType.type === constants.GPT_TYPE.dialog.type) {
+                    botInstance.editMessageReplyMarkup(chatId, messageId, null, againOptions);
                     // answerGpt(botInstance, chatId, text);
                 }
-                const voice = "ru-RU"; // язык и голос озвучивания
-                const url = `https://api.voicerss.org/?key=${process.env.VOICERSS_TOKEN}&hl=${voice}&src=${encodeURIComponent(text)}`;
+                const voiceLang = "ru-RU"; // язык озвучивания
+                const voice = "Peter"; // голос озвучивания
+                const voiceFormat = '48khz_16bit_stereo';
+                const voiceCodec = 'OGG';
+                const url = `https://api.voicerss.org/?key=${process.env.VOICERSS_TOKEN}&hl=${voiceLang}&c=${voiceCodec}&v=${voice}&f=${voiceFormat}&src=${encodeURIComponent(msg.text)}`;
                 axios.get(url, {
                     responseType: "blob"
                 }).then(response => {
@@ -869,10 +870,9 @@ bot.on('callback_query', async (ctx) => {
                 break;
 
             case '/more_gpt_image':
-                const text = savedChats[chatId].savedLastMessage;
-                if (text && savedChats[chatId].gptType.type === constants.GPT_TYPE.image.type) {
+                if (msg.text && savedChats[chatId].gptType.type === constants.GPT_TYPE.image.type) {
                     botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions);
-                    answerGpt(botInstance, chatId, text);
+                    answerGpt(botInstance, chatId, msg.text);
                 }
                 break;
 
@@ -884,15 +884,14 @@ bot.on('callback_query', async (ctx) => {
             case '/more_stablediffusion_image':
                 return botInstance.sendMessage(chatId, 'Скоро появится');
 
-                const t = savedChats[chatId].savedLastMessage;
-                if (t && savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
+                if (msg.text && savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
                     botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions);
                     getStablediffusionImage(botInstance, chatId, t);
                 }
                 break;
 
             case '/reload_gpt_dialog':
-                botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions);
+                botInstance.editMessageReplyMarkup(chatId, messageId, null, speechOptions);
                 reloadGptHistory(botInstance, chatId, true);
                 break;
 
