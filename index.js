@@ -849,7 +849,6 @@ bot.on('callback_query', async (ctx) => {
                 saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.video_audio);
                 break;
             case '/text_to_speech':
-                console.log('@@', msg.text);
                 if (msg.text && savedChats[chatId].gptType.type === constants.GPT_TYPE.dialog.type) {
                     botInstance.editMessageReplyMarkup(chatId, messageId, null, againOptions);
                     // answerGpt(botInstance, chatId, text);
@@ -862,7 +861,9 @@ bot.on('callback_query', async (ctx) => {
                 axios.get(url, {
                     responseType: "blob"
                 }).then(response => {
-                    return botInstance.sendAudio(chatId, { source: response.data, filename: 'audio.mp3' });
+                    const audioUrl = URL.createObjectURL(response.data);
+                    console.log('@@', audioUrl)
+                    return botInstance.sendAudio(chatId, { source: response.data, filename: 'audio.ogg' });
                 }).catch(error => {
                     console.log(error);
                 });
