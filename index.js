@@ -853,24 +853,17 @@ bot.on('callback_query', async (ctx) => {
                     botInstance.editMessageReplyMarkup(chatId, messageId, null, againOptions.reply_markup);
                     // answerGpt(botInstance, chatId, text);
                 }
-                const voiceLang = "ru-RU"; // язык озвучивания
-                const voice = "Peter"; // голос озвучивания
-                const voiceFormat = '48khz_16bit_stereo';
-                const voiceCodec = 'MP3';
-                const voiceSpeed = '3';
-                const url = `https://api.voicerss.org/?key=${process.env.VOICERSS_TOKEN}&hl=${voiceLang}&r=${voiceSpeed}&c=${voiceCodec}&v=${voice}&f=${voiceFormat}&src=${encodeURIComponent(msg.text)}`;
-
-                try {
-                    const response = await axios.get(url, {
-                        responseType: "arraybuffer",
-                    });
-                    const inputStream = arrayBufferToStream(response.data);
-                    const resizedBuffer = await reduceBitrate(inputStream);
-                    const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
-    
-                    return botInstance.sendAudio(chatId, { source: resizedStream, filename: 'audio.mp3' });
-                } catch(e) {
-                    return botInstance.sendMessage(chatId, e);
+                if (msg.text.length > 100) {
+                    for (let i = 0; i < msg.text.length; i += 100) {
+                        const textChunk = msg.text.substring(i, i + 100);
+                        if (i + 100 >= msg.text.length) {
+                            await textToSpeech(botInstance, chatId, msg.text.substring(i));
+                        } else {
+                            await textToSpeech(botInstance, chatId, textChunk);
+                        }
+                    }
+                } else {
+                    textToSpeech(botInstance, chatId, msg.text);
                 }
                 break;
 
@@ -930,6 +923,28 @@ bot.on('callback_query', async (ctx) => {
     }
 
 });
+
+const textToSpeech = async (bot, chatId, text) => {
+    const voiceLang = "ru-RU"; // язык озвучивания
+    const voice = "Peter"; // голос озвучивания
+    const voiceFormat = '48khz_16bit_stereo';
+    const voiceCodec = 'MP3';
+    const voiceSpeed = '3';
+    const url = `https://api.voicerss.org/?key=${process.env.VOICERSS_TOKEN}&hl=${voiceLang}&r=${voiceSpeed}&c=${voiceCodec}&v=${voice}&f=${voiceFormat}&src=${encodeURIComponent(text)}`;
+
+    try {
+        const response = await axios.get(url, {
+            responseType: "arraybuffer",
+        });
+        const inputStream = arrayBufferToStream(response.data);
+        const resizedBuffer = await reduceBitrate(inputStream);
+        const resizedStream = bufferToReadableStream(resizedBuffer, "audio.mp3");
+
+        return await bot.sendAudio(chatId, { source: resizedStream, filename: 'audio.mp3' });
+    } catch(e) {
+        return bot.sendMessage(chatId, e);
+    }
+}
 
 const cb = function(req, res) {
     res.end(`${bot.options.username}`)

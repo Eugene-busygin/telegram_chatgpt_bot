@@ -1,4 +1,4 @@
-const BOT_CHAT_VERSION = `1.19`
+const BOT_CHAT_VERSION = `1.20`
 
 const BOT_CHAT_COMMANDS = `
 /start - Перезапустить ChatGPT бота
