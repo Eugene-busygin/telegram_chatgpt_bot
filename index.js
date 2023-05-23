@@ -557,6 +557,11 @@ bot.command('auth', async (ctx) => {
         if (savedChats[chatId].isAuth) {
             return botInstance.sendMessage(chatId, `${msg.from.first_name}, Вы уже авторизованы в чате!`);
         } else {
+            authRequestList.forEach(user => {
+                if (chatId.toString() === user.chatId) {
+                    return botInstance.sendMessage(chatId, `Запрос на авторизацию в чате уже отправлен, ожидайте`);
+                }
+            });
             authRequestList.push({ name: msg.from.first_name, chatId: chatId.toString() });
             const adminId = parseInt(process.env.ADMIN_ID, 10);
             botInstance.sendMessage(adminId, `Новый запрос на авторизацию от ${msg.from.first_name}`);
@@ -705,14 +710,19 @@ bot.on('document', (ctx) => {
 
                 botInstance.getFileLink(fileId).then((link) => {
                     fileRequest(botInstance, chatId, '', {uniqueId: fileUniqueId, id: fileId, type: 'video', file: link });
-                });        
+                });
+                break;
+            default:
+                return ctx.reply('Я пока не поддерживается');
         }
-        
-        return;
     } else {
         return ctx.reply('Я пока не умею работать с документами');
     }
-    return ctx.reply('Я пока не умею работать с документами');
+});
+
+// TEXT ALL CALL_BACK
+bot.on('alert:', (ctx) => {
+    console.log('@@ALERT');
 });
 
 // TEXT ALL CALL_BACK
@@ -735,6 +745,7 @@ bot.on('text', (ctx) => {
         if (replyToText) {
             resText = replyToText + '\n' + text;
         }
+        console.log('@@', msg.reply_to_message);
         if (msg.reply_to_message.photo && msg.reply_to_message.photo.length) {
             const photo = msg.reply_to_message.photo.pop();
             const fileId = photo.file_id;
@@ -839,6 +850,24 @@ bot.on('callback_query', async (ctx) => {
                 reloadGptHistory(botInstance, chatId);
                 saveCurrentMsgToGpt(botInstance, chatId, messageId, constants.GPT_TYPE.video_audio);
                 break;
+            case '/text_to_speech':
+                console.log('@@', msg, msg.chat, ctx.update.callback_query);
+                // const text = savedChats[chatId].savedLastMessage;
+                if (text && savedChats[chatId].gptType.type === constants.GPT_TYPE.dialog.type) {
+                    botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions);
+                    // answerGpt(botInstance, chatId, text);
+                }
+                const voice = "ru-RU"; // язык и голос озвучивания
+                const url = `https://api.voicerss.org/?key=${process.env.VOICERSS_TOKEN}&hl=${voice}&src=${encodeURIComponent(text)}`;
+                axios.get(url, {
+                    responseType: "blob"
+                }).then(response => {
+                    return botInstance.sendAudio(chatId, { source: response.data, filename: 'audio.mp3' });
+                }).catch(error => {
+                    console.log(error);
+                });
+                break;
+
             case '/more_gpt_image':
                 const text = savedChats[chatId].savedLastMessage;
                 if (text && savedChats[chatId].gptType.type === constants.GPT_TYPE.image.type) {

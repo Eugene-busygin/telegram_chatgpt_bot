@@ -86,6 +86,7 @@ module.exports = {
     againOptions: {
         reply_markup: JSON.stringify({
             inline_keyboard: [
+                [{text: 'Озвучить текст', callback_data: '/text_to_speech'}],
                 [{text: 'Сбросить диалог', callback_data: '/reload_gpt_dialog'}],
             ]
         })
