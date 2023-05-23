@@ -1,7 +1,6 @@
 require('dotenv').config();
 
 const axios = require('axios');
-const fetch = require('node-fetch');
 const request = require('request');
 
 const fs = require('fs');

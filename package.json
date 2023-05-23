@@ -18,11 +18,9 @@
     "fluent-ffmpeg": "^2.1.2",
     "fs": "^0.0.1-security",
     "midjourney-client": "^1.0.8",
-    "node-fetch": "^2.6.1",
     "openai": "^3.2.1",
     "replicate": "^0.10.0",
     "request": "^2.88.2",
-    "sequelize": "^6.6.2",
     "telegraf": "^4.12.2"
   }
 }
