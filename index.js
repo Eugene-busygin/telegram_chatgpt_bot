@@ -850,7 +850,8 @@ bot.on('callback_query', async (ctx) => {
                 break;
             case '/text_to_speech':
                 if (msg.text && savedChats[chatId].gptType.type === constants.GPT_TYPE.dialog.type) {
-                    botInstance.editMessageReplyMarkup(chatId, messageId, null, againOptions.reply_markup);
+                    msg.reply_markup.inline_keyboard = msg.reply_markup.inline_keyboard.filter(element => element[0].callback_data !== field);
+                    botInstance.editMessageReplyMarkup(chatId, messageId, null, msg.reply_markup);
                     // answerGpt(botInstance, chatId, text);
                 }
                 let all = msg.text;
@@ -872,7 +873,8 @@ bot.on('callback_query', async (ctx) => {
 
             case '/more_gpt_image':
                 if (msg.text && savedChats[chatId].gptType.type === constants.GPT_TYPE.image.type) {
-                    botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions.reply_markup);
+                    msg.reply_markup.inline_keyboard = msg.reply_markup.inline_keyboard.filter(element => element[0].callback_data !== field);
+                    botInstance.editMessageReplyMarkup(chatId, messageId, null, msg.reply_markup);
                     answerGpt(botInstance, chatId, msg.text);
                 }
                 break;
@@ -886,13 +888,15 @@ bot.on('callback_query', async (ctx) => {
                 return botInstance.sendMessage(chatId, 'Скоро появится');
 
                 if (msg.text && savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
-                    botInstance.editMessageReplyMarkup(chatId, messageId, null, emptyOptions.reply_markup);
+                    msg.reply_markup.inline_keyboard = msg.reply_markup.inline_keyboard.filter(element => element[0].callback_data !== field);
+                    botInstance.editMessageReplyMarkup(chatId, messageId, null, msg.reply_markup);
                     getStablediffusionImage(botInstance, chatId, t);
                 }
                 break;
 
             case '/reload_gpt_dialog':
-                botInstance.editMessageReplyMarkup(chatId, messageId, null, speechOptions.reply_markup);
+                msg.reply_markup.inline_keyboard = msg.reply_markup.inline_keyboard.filter(element => element[0].callback_data !== field);
+                botInstance.editMessageReplyMarkup(chatId, messageId, null, msg.reply_markup);
                 reloadGptHistory(botInstance, chatId, true);
                 break;
 
