@@ -872,6 +872,7 @@ bot.on('callback_query', async (ctx) => {
                 break;
 
             case '/more_gpt_image':
+                console.log('@@', msg);
                 if (msg.text && savedChats[chatId].gptType.type === constants.GPT_TYPE.image.type) {
                     msg.reply_markup.inline_keyboard = msg.reply_markup.inline_keyboard.filter(element => element[0].callback_data !== field);
                     botInstance.editMessageReplyMarkup(chatId, messageId, null, msg.reply_markup);
