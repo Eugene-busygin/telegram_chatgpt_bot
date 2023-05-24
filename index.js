@@ -852,6 +852,7 @@ bot.on('callback_query', async (ctx) => {
                 if (msg.text && savedChats[chatId].gptType.type === constants.GPT_TYPE.dialog.type) {
                     msg.reply_markup.inline_keyboard = msg.reply_markup.inline_keyboard.filter(element => element[0].callback_data !== field);
                     botInstance.editMessageReplyMarkup(chatId, messageId, null, msg.reply_markup);
+                    botInstance.sendChatAction(chatId, 'record_voice');
                     // answerGpt(botInstance, chatId, text);
                 }
                 let all = msg.text;
@@ -887,10 +888,10 @@ bot.on('callback_query', async (ctx) => {
             case '/more_stablediffusion_image':
                 return botInstance.sendMessage(chatId, 'Скоро появится');
 
-                if (msg.text && savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
+                if (msg.caption && savedChats[chatId].gptType.type === constants.GPT_TYPE.imageStablediffusion.type) {
                     msg.reply_markup.inline_keyboard = msg.reply_markup.inline_keyboard.filter(element => element[0].callback_data !== field);
                     botInstance.editMessageReplyMarkup(chatId, messageId, null, msg.reply_markup);
-                    getStablediffusionImage(botInstance, chatId, t);
+                    getStablediffusionImage(botInstance, chatId, msg.caption);
                 }
                 break;
 
