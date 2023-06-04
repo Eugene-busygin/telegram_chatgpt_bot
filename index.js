@@ -233,6 +233,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                     // messages: [{role: "user", content: text}],
                     messages: savedChats[chatId].gptHistory,
                 });
+                console.log('@@@', result.data)
                 answer = result.data.choices[0].message.content;
                 break;
             case constants.GPT_TYPE.default.type:
