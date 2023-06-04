@@ -228,13 +228,12 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 }
                 updateGptHistory(chatId, text);
                 typeAnswer = 'text';
-                console.log('@@@', text)
                 result = await openai.createChatCompletion({
                     model: constants.GPT_MODELS.turbo,
                     // messages: [{role: "user", content: text}],
                     messages: savedChats[chatId].gptHistory,
                 });
-                console.log('@@@', result.data)
+                console.log('@@@', result)
                 answer = result.data.choices[0].message.content;
                 break;
             case constants.GPT_TYPE.default.type:
@@ -245,6 +244,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                     prompt: text,
                     temperature: 0.5,
                 });
+                console.log('@@@', result)
                 answer = result.data.choices[0].text;
                 break;
             case constants.GPT_TYPE.audio.type:
