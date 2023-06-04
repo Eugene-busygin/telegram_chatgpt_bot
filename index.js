@@ -228,6 +228,7 @@ const requestGpt = async (bot, chatId, text, fileObj = null) => {
                 }
                 updateGptHistory(chatId, text);
                 typeAnswer = 'text';
+                console.log('@@@', text)
                 result = await openai.createChatCompletion({
                     model: constants.GPT_MODELS.turbo,
                     // messages: [{role: "user", content: text}],
