@@ -963,7 +963,6 @@ try {
         webhook: {
             domain: `${process.env.URL}`,
             port: `${process.env.PORT}`,
-            host: `${process.env.URL}`,
             cb
         }
     });
