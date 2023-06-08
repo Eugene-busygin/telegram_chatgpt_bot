@@ -964,7 +964,6 @@ try {
             domain: `${process.env.URL}`,
             port: `${process.env.PORT}`,
             host: `${process.env.URL}`,
-            secretToken: `${process.env.BOT_TOKEN}`,
             cb
         }
     });
