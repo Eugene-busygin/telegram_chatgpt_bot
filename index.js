@@ -959,13 +959,14 @@ const cb = function(req, res) {
 }
 
 try {
-    bot.launch({
-        webhook: {
-            domain: `${process.env.URL}`,
-            port: `${process.env.PORT}`,
-            cb
-        }
-    });
+    // bot.launch({
+    //     webhook: {
+    //         domain: `${process.env.URL}`,
+    //         port: `${process.env.PORT}`,
+    //         cb
+    //     }
+    // });
+    bot.launch();
     if (timerPingId) {
         timerPingId = null;
     }
