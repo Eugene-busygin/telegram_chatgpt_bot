@@ -959,13 +959,15 @@ const cb = function(req, res) {
 }
 
 try {
-    // bot.launch({
-    //     webhook: {
-    //         domain: `${process.env.URL}`,
-    //         port: `${process.env.PORT}`,
-    //         cb
-    //     }
-    // });
+    bot.launch({
+        webhook: {
+            domain: `${process.env.URL}`,
+            port: `${process.env.PORT}`,
+            host: `${process.env.URL}`,
+            secretToken: `${process.env.BOT_TOKEN}`,
+            cb
+        }
+    });
     bot.launch();
     if (timerPingId) {
         timerPingId = null;
